@@ -19,11 +19,12 @@ import os
 import json
 
 
-image_file = r"H:\Gamut\Projects\NodeVault\media\image.png"
-file_path =  r"H:\Gamut\Projects\NodeVault\env\studio_shared_folder"
-json_file = os.path.join(file_path , "gizmo_file.json")
+image_file = r"H:\Gamut\Projects\node_vault\media\image.png"
+STUDIO_SHARED_FOLDER =  r"H:\Gamut\Projects\node_vault\env\studio_shared_folder"
+json_file = os.path.join(STUDIO_SHARED_FOLDER , "gizmo_file.json")
 FIXED_POLICY = QSizePolicy.Policy.Fixed
-
+GIZMO_PATH = r"H:\Gamut\Projects\node_vault\env\studio_shared_folder\files\Gizmos\gizmo_3_name"
+USER_NUKE_PATH = r"H:\Gamut\Projects\node_vault\env\user_nuke"
 
 class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
     def __init__(self):
@@ -47,6 +48,7 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
 
         self.init_library_ui()
         self.init_submit_ui()
+        self.temp_subscribe_ui()
 
         # -------------- ASSEMBLE MAIN WINDOW --------------
         self.main_layout.addWidget(self.primary_tabs)
@@ -251,8 +253,8 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         self.sub_category_layout.addWidget(self.btn_draw, 0, 1)
         self.sub_category_layout.addWidget(self.btn_time, 0, 2)
         self.sub_category_layout.addWidget(self.btn_image, 1, 0)
-        self.sub_category_layout.addWidget(self.btn_channel, 0, 0)
-        self.sub_category_layout.addWidget(self.btn_filter, 0, 1)
+        self.sub_category_layout.addWidget(self.btn_channel, 1, 1)
+        self.sub_category_layout.addWidget(self.btn_filter, 1, 2)
 
         # --- Language Options ---
         self.language_box = QGroupBox("Language")
@@ -312,11 +314,26 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
 
         self.submit_layout.addLayout(self.main_left_box)
         self.submit_layout.addLayout(self.main_right_box)
-
-
-# -------------------------------------------------------------
-    
         self.btn_submit.clicked.connect(self.on_submit)
+        
+
+        
+        
+    def temp_subscribe_ui(self):
+        subscribe_tab = QWidget()
+        subscribe_tab_layout =  QHBoxLayout(subscribe_tab)
+        self.btn_subscribe = QPushButton("Subs")
+        subscribe_tab_layout.addWidget(self.btn_subscribe)
+        self.primary_tabs.addTab(subscribe_tab, "Sub")
+        
+
+        self.btn_subscribe.clicked.connect(self.write_profile)
+        self.btn_subscribe.clicked.connect(self.write_user_init)
+        self.btn_subscribe.clicked.connect(self.write_user_menu)
+        
+# -----------
+    
+    
     
     def get_information(self):
         filename = self.filename_le.text()
@@ -332,14 +349,62 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         link_4 = self.link_4.text()
         return link_1, link_2, link_3, link_4
 
+    
+        
+    def get_gizmo_file(self):
+        self.selected_gizmo = GIZMO_PATH
+        files = os.listdir(self.selected_gizmo)
+        for file in files:
+            if file.endswith(".gizmo"):
+                gizmo_file = file
+                gizmo_name = os.path.splitext(gizmo_file)[0]
+        return gizmo_file , gizmo_name
+    
+    def write_profile(self):
+        gizmo_file, gizmo_name = self.get_gizmo_file()
+        username = "sahil"
+        profile_path = os.path.join(STUDIO_SHARED_FOLDER, "users", username, "profile.json")
+        with open(profile_path, "r") as f:
+            data = json.load(f)
+        data["subscriptions"].append(gizmo_name)
+        with open(profile_path, "w") as file:
+            json.dump(data, file, indent=4)
+            
+    def read_profile(self):
+        profile_path = os.path.join(STUDIO_SHARED_FOLDER, "users", username, "profile.json")
+        with open(profile_path, "r") as f:
+            data = json.load(f)
+        data["subscriptions"].append(gizmo_name)
+            
+            
+    def write_user_init(self):
+        filename, _, _, _ = self.get_information()
+        init = os.path.join(USER_NUKE_PATH, "init.py")
+        data = f"nuke.pluginAddPath('../studio_shared_folder/{filename}.gizmo')"
+        with open(init, "a") as file:
+            file.write(data + "\n")
+    
+    def write_user_menu(self):
+        filename, _, _, _ = self.get_information()
+        menu = os.path.join(USER_NUKE_PATH, "menu.py")
+        data = f"nuke.menu('Nodes').addCommand('Gizmos/{filename}', 'nuke.createNode('{filename}')')"
+        with open(menu, "a") as file:
+            file.write(data + "\n")
+    
     def on_submit(self):
         filename, author, version, tagline = self.get_information()
         link_1, link_2, link_3, link_4 = self.get_externals()
+        folder_name = f"{filename}"
+        folder_path = os.path.join(STUDIO_SHARED_FOLDER, folder_name)
+        json_file_path = os.path.join(folder_path, f"{filename}_info.json")
+        os.makedirs(folder_path, exist_ok=True)
+        print(folder_path)
+        
         data = {
             "filename": filename,
-            "author":   author,
-            "version":  version,
-            "tagline":  tagline,
+            "author": author,
+            "version": version,
+            "tagline": tagline,
             "Link 1" : link_1,
             "Link 2" : link_2,
             "Link 3" : link_3,
@@ -347,7 +412,7 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
             
         }
         
-        with open(json_file, "w") as file:
+        with open(json_file_path, "w") as file:
             json.dump(data, file, indent=4)
             
             
