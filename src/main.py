@@ -10,10 +10,11 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QGridLayout,
     QTreeView,
-    QGroupBox, QLineEdit, QFormLayout
+    QGroupBox, QLineEdit, QFormLayout,
+    QTextEdit, QFileDialog
 )
 from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt , Slot
 import sys
 import os
 import json
@@ -26,7 +27,7 @@ FIXED_POLICY = QSizePolicy.Policy.Fixed
 GIZMO_PATH = r"H:\Gamut\Projects\node_vault\env\studio_shared_folder\files\Gizmos\gizmo_3_name"
 USER_NUKE_PATH = r"H:\Gamut\Projects\node_vault\env\user_nuke"
 
-class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
+class NodeVault_GUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Node Vault")
@@ -146,7 +147,7 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         self.display_controls_layout.addWidget(self.col_lbl)
         self.display_controls_layout.addWidget(self.col_cbx)
 
-        # -------------- CONTENT AREA LAYOUT (filter bar + controls) --------------
+        # -------------- CONTENT AREA LAYOUT  --------------
         self.right_panel_layout = QVBoxLayout()
         self.right_panel_layout.addWidget(self.filter_bar)
         self.right_panel_layout.addLayout(self.display_controls_layout)
@@ -154,11 +155,9 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         # -------------- ASSEMBLE LIBRARY TAB --------------
         self.library_layout.addWidget(self.category_panel)
         self.library_layout.addLayout(self.right_panel_layout)
-        
-        
-        
 
-    def init_submit_ui(self):  
+
+    def init_submit_ui(self):
 
         # -------------- SUBMIT TAB LAYOUT --------------
         self.submit_layout = QHBoxLayout(self.submit_tab)
@@ -167,10 +166,8 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
 
         self.btn_submit = QPushButton("Submit")
         r_hbox_1 = QHBoxLayout()
-        self.group_boxes_layout = QGridLayout()
         self.submit_lbl = QLabel("Submit to Dataset")
         self.filetype_lbl = QLabel("File Type")
-
         self.main_lbl = QLabel("Main File")
         self.description_lbl = QLabel("Description")
 
@@ -186,23 +183,30 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         self.filetype_box_layout.addWidget(self.script_btn, 0, 1)
         self.filetype_box_layout.addWidget(self.template_btn, 0, 2)
 
+        # ------------- Main File Box -----------
         file_group = QGroupBox("Main File")
         file_layout = QVBoxLayout(file_group)
 
         self.file_label = QLabel()
-        self.file_label.setText("No Image")
+        self.file_label.setText("No file selected")
         file_layout.addWidget(self.file_label)
 
+        self.file_browse_btn = QPushButton("Browse")
+        self.file_browse_btn.clicked.connect(self.on_file_browse_clicked)
+        file_layout.addWidget(self.file_browse_btn)
+
+        # ------------- Description Box -----------
         desc_group = QGroupBox("Description")
         desc_layout = QVBoxLayout(desc_group)
 
-        self.desc_edit = QLineEdit()
+        self.desc_edit = QTextEdit()
         self.desc_edit.setPlaceholderText("Enter description…")
+        self.desc_edit.setFixedHeight(80)
         desc_layout.addWidget(self.desc_edit)
 
+        r_hbox_1.addWidget(file_group)
         r_hbox_1.addWidget(desc_group)
-        
-        
+
         # -------- Information Box ---------------
         self.information_box = QGroupBox("Information")
         self.information_box_layout = QHBoxLayout(self.information_box)
@@ -214,7 +218,7 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         self.author_le = QLineEdit()
         self.version_le = QLineEdit()
         self.tagline_le = QLineEdit()
-        
+
         left_form.addRow("Filename:", self.filename_le)
         left_form.addRow("Author:", self.author_le)
 
@@ -224,70 +228,60 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         self.information_box_layout.addLayout(left_form)
         self.information_box_layout.addLayout(right_form)
 
-        # --- Category Options ---
-        self.category_box = QGroupBox("Category")
-        self.category_layout = QGridLayout(self.category_box)
-
-        self.btn_templates = QPushButton("Templates")
-        self.btn_gizmos = QPushButton("Gizmos")
-        self.btn_tricks = QPushButton("Tricks")
-        self.btn_misc = QPushButton("Misc")
-
-        self.category_layout.addWidget(self.btn_templates, 0, 0)
-        self.category_layout.addWidget(self.btn_gizmos, 0, 1)
-        self.category_layout.addWidget(self.btn_tricks, 0, 2)
-        self.category_layout.addWidget(self.btn_misc, 1, 0)
-
-        # --- Sub-Category Options ---
+        # --- Sub-Category Options  ---
         self.sub_category_box = QGroupBox("Sub Category")
-        self.sub_category_layout = QGridLayout(self.sub_category_box)
+        self.sub_category_layout = QHBoxLayout(self.sub_category_box)
 
-        self.btn_deep = QPushButton("Deep")
-        self.btn_draw = QPushButton("Draw")
-        self.btn_time = QPushButton("Time")
-        self.btn_image = QPushButton("Image")
+        self.btn_deep    = QPushButton("Deep")
+        self.btn_draw    = QPushButton("Draw")
+        self.btn_time    = QPushButton("Time")
+        self.btn_image   = QPushButton("Image")
         self.btn_channel = QPushButton("Channel")
-        self.btn_filter = QPushButton("Filter")
+        self.btn_filter  = QPushButton("Filter")
 
-        self.sub_category_layout.addWidget(self.btn_deep, 0, 0)
-        self.sub_category_layout.addWidget(self.btn_draw, 0, 1)
-        self.sub_category_layout.addWidget(self.btn_time, 0, 2)
-        self.sub_category_layout.addWidget(self.btn_image, 1, 0)
-        self.sub_category_layout.addWidget(self.btn_channel, 1, 1)
-        self.sub_category_layout.addWidget(self.btn_filter, 1, 2)
+        self.sub_category_layout.addWidget(self.btn_deep)
+        self.sub_category_layout.addWidget(self.btn_draw)
+        self.sub_category_layout.addWidget(self.btn_time)
+        self.sub_category_layout.addWidget(self.btn_image)
+        self.sub_category_layout.addWidget(self.btn_channel)
+        self.sub_category_layout.addWidget(self.btn_filter)
 
-        # --- Language Options ---
-        self.language_box = QGroupBox("Language")
-        self.language_box_layout = QGridLayout(self.language_box)
+        # --- Render + Nuke Version  ---
+        self.render_nuke_layout = QHBoxLayout()
 
-        self.btn_python = QPushButton("Python")
-        self.btn_c = QPushButton("C++")
-
-        self.language_box_layout.addWidget(self.btn_python, 0, 0)
-        self.language_box_layout.addWidget(self.btn_c, 0, 1)
-
-        # --- Render Options ---
         self.render_box = QGroupBox("Render")
-        self.render_box_layout = QGridLayout(self.render_box)
+        self.render_box_layout = QHBoxLayout(self.render_box)
 
         self.btn_cpu = QPushButton("CPU")
         self.btn_gpu = QPushButton("GPU")
 
-        self.render_box_layout.addWidget(self.btn_cpu, 0, 0)
-        self.render_box_layout.addWidget(self.btn_gpu, 0, 1)
+        self.render_box_layout.addWidget(self.btn_cpu)
+        self.render_box_layout.addWidget(self.btn_gpu)
 
-        # -------- External Links Box ---------------
-        self.external_box = QGroupBox("External_links")
+        self.nuke_box = QGroupBox("Nuke Version")
+        self.nuke_box_layout = QHBoxLayout(self.nuke_box)
+
+        self.btn_nuke_old = QPushButton("Nuke13-")
+        self.btn_nuke_new = QPushButton("Nuke13+")
+
+        self.nuke_box_layout.addWidget(self.btn_nuke_old)
+        self.nuke_box_layout.addWidget(self.btn_nuke_new)
+
+        self.render_nuke_layout.addWidget(self.render_box)
+        self.render_nuke_layout.addWidget(self.nuke_box)
+
+        # -------- External Links Box -------
+        self.external_box = QGroupBox("External Links")
         self.external_box_layout = QHBoxLayout(self.external_box)
 
         left_form = QFormLayout()
         right_form = QFormLayout()
-        
+
         self.link_1 = QLineEdit()
         self.link_2 = QLineEdit()
         self.link_3 = QLineEdit()
         self.link_4 = QLineEdit()
-        
+
         left_form.addRow("Repo:", self.link_1)
         left_form.addRow("Issues:", self.link_2)
 
@@ -297,125 +291,186 @@ class NodeVault_GUI(QWidget):  # CHANGED: renamed from two separate classes
         self.external_box_layout.addLayout(left_form)
         self.external_box_layout.addLayout(right_form)
 
+        # -------- Docs Box ---------
+        self.docs_box = QGroupBox("Docs")
+        self.docs_box_layout = QVBoxLayout(self.docs_box)
 
+        readme_row = QHBoxLayout()
+        self.readme_lbl = QLabel("No file")
+        self.readme_browse_btn = QPushButton("Browse README.md")
+        self.readme_browse_btn.clicked.connect(self.on_readme_browse_clicked)
+        readme_row.addWidget(QLabel("README:"))
+        readme_row.addWidget(self.readme_lbl)
+        readme_row.addWidget(self.readme_browse_btn)
 
-        self.group_boxes_layout.addWidget(self.category_box, 0, 0)
-        self.group_boxes_layout.addWidget(self.sub_category_box, 1, 0)
-        self.group_boxes_layout.addWidget(self.language_box, 0, 1)
-        self.group_boxes_layout.addWidget(self.render_box, 1, 1)
+        extra1_row = QHBoxLayout()
+        self.extra1_lbl = QLabel("No file")
+        self.extra1_browse_btn = QPushButton("Browse")
+        self.extra1_browse_btn.clicked.connect(self.on_extra1_browse_clicked)
+        extra1_row.addWidget(QLabel("Extra Doc 1:"))
+        extra1_row.addWidget(self.extra1_lbl)
+        extra1_row.addWidget(self.extra1_browse_btn)
 
+        extra2_row = QHBoxLayout()
+        self.extra2_lbl = QLabel("No file")
+        self.extra2_browse_btn = QPushButton("Browse")
+        self.extra2_browse_btn.clicked.connect(self.on_extra2_browse_clicked)
+        extra2_row.addWidget(QLabel("Extra Doc 2:"))
+        extra2_row.addWidget(self.extra2_lbl)
+        extra2_row.addWidget(self.extra2_browse_btn)
+
+        self.docs_box_layout.addLayout(readme_row)
+        self.docs_box_layout.addLayout(extra1_row)
+        self.docs_box_layout.addLayout(extra2_row)
+
+        # -------- Preview Images + Demo Video -----------
+        self.media_box = QGroupBox("Preview Images & Demo Video")
+        self.media_box_layout = QHBoxLayout(self.media_box)
+
+        self.preview_btn_1 = QPushButton("Img 1")
+        self.preview_btn_2 = QPushButton("Img 2")
+        self.preview_btn_3 = QPushButton("Img 3")
+        self.preview_btn_4 = QPushButton("Img 4")
+        self.preview_btn_5 = QPushButton("Img 5")
+        self.demo_video_btn = QPushButton("Demo Video")
+
+        self.preview_btn_1.clicked.connect(self.on_preview_btn_1_clicked)
+        self.preview_btn_2.clicked.connect(self.on_preview_btn_2_clicked)
+        self.preview_btn_3.clicked.connect(self.on_preview_btn_3_clicked)
+        self.preview_btn_4.clicked.connect(self.on_preview_btn_4_clicked)
+        self.preview_btn_5.clicked.connect(self.on_preview_btn_5_clicked)
+        self.demo_video_btn.clicked.connect(self.on_demo_video_btn_clicked)
+
+        self.media_box_layout.addWidget(self.preview_btn_1)
+        self.media_box_layout.addWidget(self.preview_btn_2)
+        self.media_box_layout.addWidget(self.preview_btn_3)
+        self.media_box_layout.addWidget(self.preview_btn_4)
+        self.media_box_layout.addWidget(self.preview_btn_5)
+        self.media_box_layout.addWidget(self.demo_video_btn)
+
+        # -------------- ASSEMBLE LEFT --------------
         self.main_left_box.addWidget(self.filetype_box)
         self.main_left_box.addWidget(self.information_box)
-        self.main_left_box.addLayout(self.group_boxes_layout)
+        self.main_left_box.addWidget(self.sub_category_box)
+        self.main_left_box.addLayout(self.render_nuke_layout)
 
+        # -------------- ASSEMBLE RIGHT --------------
         self.main_right_box.addLayout(r_hbox_1)
+        self.main_right_box.addWidget(self.docs_box)
         self.main_right_box.addWidget(self.external_box)
+        self.main_right_box.addWidget(self.media_box)
         self.main_right_box.addWidget(self.btn_submit)
 
         self.submit_layout.addLayout(self.main_left_box)
         self.submit_layout.addLayout(self.main_right_box)
-        self.btn_submit.clicked.connect(self.on_submit)
-        
 
-        
-        
+
     def temp_subscribe_ui(self):
         subscribe_tab = QWidget()
-        subscribe_tab_layout =  QHBoxLayout(subscribe_tab)
+        subscribe_tab_layout = QHBoxLayout(subscribe_tab)
         self.btn_subscribe = QPushButton("Subs")
         subscribe_tab_layout.addWidget(self.btn_subscribe)
         self.primary_tabs.addTab(subscribe_tab, "Sub")
-        
 
-        self.btn_subscribe.clicked.connect(self.write_profile)
-        self.btn_subscribe.clicked.connect(self.write_user_init)
-        self.btn_subscribe.clicked.connect(self.write_user_menu)
-        
-# -----------
-    
-    
-    
-    def get_information(self):
-        filename = self.filename_le.text()
-        author = self.author_le.text()
-        version = self.version_le.text()
-        tagline = self.tagline_le.text()
-        return filename, author, version, tagline
-    
-    def get_externals(self):
-        link_1 = self.link_1.text()
-        link_2 = self.link_2.text()
-        link_3 = self.link_3.text()
-        link_4 = self.link_4.text()
-        return link_1, link_2, link_3, link_4
+
+    # SLOTS
+
+    @Slot()
+    def on_file_browse_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Main File", "",
+            "Nuke files (*.gizmo *.py *.nk);;All files (*)"
+        )
+        if path:
+            self.file_label.setText(os.path.basename(path))
+            
+    @Slot()
+    def on_readme_browse_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select README", "",
+            "Markdown (*.md);;Text (*.txt);;All files (*)"
+        )
+        if path:
+            self.readme_lbl.setText(os.path.basename(path))
+            
+            
+    @Slot()
+    def on_extra1_browse_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Extra Doc 1", "",
+            "PDF (*.pdf);;All files (*)"
+        )
+        if path:
+            self.extra1_lbl.setText(os.path.basename(path))
+
+    @Slot()
+    def on_extra2_browse_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Extra Doc 2", "",
+            "PDF (*.pdf);;All files (*)"
+        )
+        if path:
+            self.extra2_lbl.setText(os.path.basename(path))
+
+
+    @Slot()
+    def on_preview_btn_1_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Preview Image 1", "",
+            "Images (*.png *.jpg *.jpeg);;All files (*)"
+        )
+        if path:
+            self.preview_btn_1.setText(os.path.basename(path))
+
+    @Slot()
+    def on_preview_btn_2_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Preview Image 2", "",
+            "Images (*.png *.jpg *.jpeg);;All files (*)"
+        )
+        if path:
+            self.preview_btn_2.setText(os.path.basename(path))
 
     
-        
-    def get_gizmo_file(self):
-        self.selected_gizmo = GIZMO_PATH
-        files = os.listdir(self.selected_gizmo)
-        for file in files:
-            if file.endswith(".gizmo"):
-                gizmo_file = file
-                gizmo_name = os.path.splitext(gizmo_file)[0]
-        return gizmo_file , gizmo_name
+    @Slot()
+    def on_preview_btn_3_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Preview Image 3", "",
+            "Images (*.png *.jpg *.jpeg);;All files (*)"
+        )
+        if path:
+            self.preview_btn_3.setText(os.path.basename(path))
+
     
-    def write_profile(self):
-        gizmo_file, gizmo_name = self.get_gizmo_file()
-        username = "sahil"
-        profile_path = os.path.join(STUDIO_SHARED_FOLDER, "users", username, "profile.json")
-        with open(profile_path, "r") as f:
-            data = json.load(f)
-        data["subscriptions"].append(gizmo_name)
-        with open(profile_path, "w") as file:
-            json.dump(data, file, indent=4)
-            
-    def read_profile(self):
-        profile_path = os.path.join(STUDIO_SHARED_FOLDER, "users", username, "profile.json")
-        with open(profile_path, "r") as f:
-            data = json.load(f)
-        data["subscriptions"].append(gizmo_name)
-            
-            
-    def write_user_init(self):
-        filename, _, _, _ = self.get_information()
-        init = os.path.join(USER_NUKE_PATH, "init.py")
-        data = f"nuke.pluginAddPath('../studio_shared_folder/{filename}.gizmo')"
-        with open(init, "a") as file:
-            file.write(data + "\n")
+    @Slot()
+    def on_preview_btn_4_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Preview Image 4", "",
+            "Images (*.png *.jpg *.jpeg);;All files (*)"
+        )
+        if path:
+            self.preview_btn_4.setText(os.path.basename(path))
+
     
-    def write_user_menu(self):
-        filename, _, _, _ = self.get_information()
-        menu = os.path.join(USER_NUKE_PATH, "menu.py")
-        data = f"nuke.menu('Nodes').addCommand('Gizmos/{filename}', 'nuke.createNode('{filename}')')"
-        with open(menu, "a") as file:
-            file.write(data + "\n")
-    
-    def on_submit(self):
-        filename, author, version, tagline = self.get_information()
-        link_1, link_2, link_3, link_4 = self.get_externals()
-        folder_name = f"{filename}"
-        folder_path = os.path.join(STUDIO_SHARED_FOLDER, folder_name)
-        json_file_path = os.path.join(folder_path, f"{filename}_info.json")
-        os.makedirs(folder_path, exist_ok=True)
-        print(folder_path)
-        
-        data = {
-            "filename": filename,
-            "author": author,
-            "version": version,
-            "tagline": tagline,
-            "Link 1" : link_1,
-            "Link 2" : link_2,
-            "Link 3" : link_3,
-            "Link 4" : link_4,
-            
-        }
-        
-        with open(json_file_path, "w") as file:
-            json.dump(data, file, indent=4)
-            
-            
+    @Slot()
+    def on_preview_btn_5_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Preview Image 5", "",
+            "Images (*.png *.jpg *.jpeg);;All files (*)"
+        )
+        if path:
+            self.preview_btn_5.setText(os.path.basename(path))
+
+    @Slot()
+    def on_demo_video_btn_clicked(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Demo Video", "",
+            "Video (*.mp4 *.mov *.avi);;All files (*)"
+        )
+        if path:
+            self.demo_video_btn.setText(os.path.basename(path))
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
