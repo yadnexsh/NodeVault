@@ -15,20 +15,21 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QTextEdit, 
     QFileDialog,
-    QSpacerItem
+    QSpacerItem,
+    QButtonGroup
 )
 from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem
 from PySide6.QtCore import Qt, Slot
 import sys
 import os
 import json
-
+import datetime
 
 image_file = r"H:\Gamut\Projects\node_vault\media\heavily_compressed.png"
-STUDIO_SHARED_FOLDER = r"H:\Gamut\Projects\node_vault\env\studio_shared_folder"
-json_file = os.path.join(STUDIO_SHARED_FOLDER, "gizmo_file.json")
+OUTPUT_FOLDER = r"H:\Gamut\Projects\node_vault\output"
+json_file = os.path.join(OUTPUT_FOLDER, "gizmo_file.json")
 FIXED_POLICY = QSizePolicy.Policy.Fixed
-GIZMO_PATH = r"H:\Gamut\Projects\node_vault\env\studio_shared_folder\files\Gizmos\gizmo_3_name"
+GIZMO_PATH = r"H:\Gamut\Projects\node_vault\env\OUTPUT_FOLDER\files\Gizmos\gizmo_3_name"
 USER_NUKE_PATH = r"H:\Gamut\Projects\node_vault\env\user_nuke"
 
 class NodeVault_GUI(QWidget):
@@ -149,13 +150,11 @@ class NodeVault_GUI(QWidget):
         self.main_left_box = QVBoxLayout()
         self.main_right_box = QVBoxLayout()
 
-
-
-        # ========== CREATE ALL WIDGETS  ======================
         
 
+
         # -------- Information Box ---------------
-        self.information_box = QGroupBox("")
+        self.information_box = QGroupBox("X")
         self.information_box_layout = QHBoxLayout(self.information_box)
 
         left_form = QFormLayout()
@@ -177,14 +176,16 @@ class NodeVault_GUI(QWidget):
         # ------------- File Type Box -----------
         self.filetype_box = QGroupBox("File Types")
         self.filetype_box_layout = QHBoxLayout(self.filetype_box) 
-
+        
+        self.filetype_bg = QButtonGroup(self)
         self.gizmo_btn = QPushButton("Gizmo")
         self.script_btn = QPushButton("Script")
         self.template_btn = QPushButton("Template")
 
-        self.filetype_box_layout.addWidget(self.gizmo_btn)
-        self.filetype_box_layout.addWidget(self.script_btn)
-        self.filetype_box_layout.addWidget(self.template_btn)
+        for btn in [self.gizmo_btn, self.script_btn, self.template_btn]:
+            btn.setCheckable(True)
+            self.filetype_bg.addButton(btn)
+            self.filetype_box_layout.addWidget(btn)
 
         # ------------- Main File Box -----------
         file_group = QGroupBox("Main File")
@@ -207,6 +208,7 @@ class NodeVault_GUI(QWidget):
         self.sub_category_box = QGroupBox("Sub Category")
         self.sub_category_layout = QHBoxLayout(self.sub_category_box)
 
+        self.subcategory_bg = QButtonGroup(self)
         self.btn_deep    = QPushButton("Deep")
         self.btn_draw    = QPushButton("Draw")
         self.btn_time    = QPushButton("Time")
@@ -214,29 +216,40 @@ class NodeVault_GUI(QWidget):
         self.btn_channel = QPushButton("Channel")
         self.btn_filter  = QPushButton("Filter")
 
-        self.sub_category_layout.addWidget(self.btn_deep)
-        self.sub_category_layout.addWidget(self.btn_draw)
-        self.sub_category_layout.addWidget(self.btn_time)
-        self.sub_category_layout.addWidget(self.btn_image)
-        self.sub_category_layout.addWidget(self.btn_channel)
-        self.sub_category_layout.addWidget(self.btn_filter)
+        for btn in [self.btn_deep, self.btn_draw, self.btn_time, self.btn_image, self.btn_channel, self.btn_filter]:
+            btn.setCheckable(True)
+            self.subcategory_bg.addButton(btn)
+            self.sub_category_layout.addWidget(btn)
+            
+
+
 
         # --- Render + Nuke Version  ---
         self.render_nuke_layout = QHBoxLayout()
 
         self.render_box = QGroupBox("Render")
         self.render_box_layout = QHBoxLayout(self.render_box)
+        
+        self.render_bg = QButtonGroup(self)
         self.btn_cpu = QPushButton("CPU")
         self.btn_gpu = QPushButton("GPU")
-        self.render_box_layout.addWidget(self.btn_cpu)
-        self.render_box_layout.addWidget(self.btn_gpu)
+        
+        for btn in [self.btn_cpu, self.btn_gpu]:
+            btn.setCheckable(True)
+            self.render_bg.addButton(btn)
+            self.render_box_layout.addWidget(btn)
 
         self.nuke_box = QGroupBox("Nuke Version")
         self.nuke_box_layout = QHBoxLayout(self.nuke_box)
+        
+        self.nuke_bg = QButtonGroup(self)
         self.btn_nuke_old = QPushButton("Nuke13-")
         self.btn_nuke_new = QPushButton("Nuke13+")
-        self.nuke_box_layout.addWidget(self.btn_nuke_old)
-        self.nuke_box_layout.addWidget(self.btn_nuke_new)
+        
+        for btn in [self.btn_nuke_old, self.btn_nuke_new]:
+            btn.setCheckable(True)
+            self.nuke_bg.addButton(btn)
+            self.nuke_box_layout.addWidget(btn)
 
         self.render_nuke_layout.addWidget(self.render_box)
         self.render_nuke_layout.addWidget(self.nuke_box)
@@ -329,7 +342,7 @@ class NodeVault_GUI(QWidget):
         self.media_box_layout.addWidget(self.demo_video_btn, 1, 2)
 
 
-        # ================ ASSEMBLE LEFT COLUMN ================================
+        #---
 
         self.main_left_box.addWidget(self.information_box)
         self.main_left_box.addWidget(self.filetype_box)
@@ -342,11 +355,10 @@ class NodeVault_GUI(QWidget):
         self.main_left_box.addWidget(self.sub_category_box)
         self.main_left_box.addLayout(self.render_nuke_layout)
         
-        v_spacer_left = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        v_spacer_left = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)       # W H hdata policy and vdata policy
         self.main_left_box.addItem(v_spacer_left) 
 
-
-# ================ ASSEMBLE RIGHT COLUMN ================================
+# ++++
         self.main_right_box.addWidget(self.docs_box)
         self.main_right_box.addWidget(self.external_box)
         self.main_right_box.addWidget(self.media_box)
@@ -360,17 +372,19 @@ class NodeVault_GUI(QWidget):
         btn_font = self.btn_submit.font()
         btn_font.setBold(True)
         self.btn_submit.setFont(btn_font)
+        
+        self.btn_submit.clicked.connect(self.on_submit_clicked)
 
 
-# ================ FINAL LAYOUT ASSEMBLE ================================
+# ----
         self.columns_layout.addLayout(self.main_left_box)
         self.columns_layout.addLayout(self.main_right_box)
         
         self.submit_master_layout.addLayout(self.columns_layout)
         
-        self.submit_master_layout.addWidget(self.btn_submit, alignment=Qt.AlignCenter)
+        self.submit_master_layout.addWidget(self.btn_submit, alignment = Qt.AlignCenter)
 
-
+# TEMP
     def temp_subscribe_ui(self):
         subscribe_tab = QWidget()
         subscribe_tab_layout = QHBoxLayout(subscribe_tab)
@@ -378,8 +392,86 @@ class NodeVault_GUI(QWidget):
         subscribe_tab_layout.addWidget(self.btn_subscribe)
         self.primary_tabs.addTab(subscribe_tab, "Sub")
 
+#------
+    
+    @Slot()
+    def on_submit_clicked(self):
+        filename = self.filename_le.text()
+        if not filename:
+            print("Submission failed: Filename is required!")
+            return
+        
+        version = self.version_le.text() or "v001"
+        
+        filetype = "Unknown"
+        if self.filetype_bg.checkedButton():
+            filetype = self.filetype_bg.checkedButton().text()
+            
+        sub_category = "Unknown"
+        if self.subcategory_bg.checkedButton():
+            sub_category = self.subcategory_bg.checkedButton().text()
+            
+        render_type = "Unknown"
+        if self.render_bg.checkedButton():
+            render_type = self.render_bg.checkedButton().text()
+            
+        nuke_version = "Unknown"
+        if self.nuke_bg.checkedButton():
+            nuke_version = self.nuke_bg.checkedButton().text()
+            
+        readme_text = self.readme_lbl.text()
+        if readme_text == "No file":
+            readme = ""
+        else:
+            readme = readme_text
+            
+        extra_docs = []
+        doc1_text = self.extra1_lbl.text()
+        if doc1_text != "No file":
+            extra_docs.append(doc1_text)
+            
+        doc2_text = self.extra2_lbl.text()
+        if doc2_text != "No file":
+            extra_docs.append(doc2_text)
+            
 
-    # SLOTS
+
+# IMG AND VIDEO pending
+
+        data = {
+            "id": "pending",
+            "submiited": datetime.datetime.now().isoformat(timespec='seconds'),
+            "filetype": filetype,
+            "filename": filename,
+            "author": self.author_le.text(),
+            "version": version,
+            "sub_category": sub_category,
+            "tags": [], 
+            "render": render_type,
+            "nuke_version": nuke_version,
+            "description": self.desc_edit.toPlainText(),
+            "tagline": self.tagline_le.text(),
+            "readme": readme,
+            "extra_docs": extra_docs,
+            "repo_link": self.link_1.text(),
+            "issues_link": self.link_2.text(),
+            "website": self.link_3.text(),
+            "extra_link": self.link_4.text(),
+            "attached_images": "pending",
+            "attached_video": "pending"
+        }
+
+        safe_filename = os.path.splitext(filename)[0]
+        save_path = os.path.join(OUTPUT_FOLDER, f"{safe_filename}.json")
+        
+        try:
+            os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+            with open(save_path, 'w', encoding='utf-8') as file:
+                json.dump(data, file, indent=4)
+            # print(f"Success! Saved data to: {save_path}")
+        except Exception as e:
+            print(f"Error saving file: {e}")
+
 
     @Slot()
     def on_file_browse_clicked(self):

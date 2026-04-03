@@ -11,3 +11,18 @@
 8 Make the one compoenet working - Getting the data from user [ Submit form ] - WIP Signals Pending
 9 Allowing user to load the gizmos in nuke which user has subuscribed via GUI.
 10 Displaying the submitted gizmo in Lib view and in detailed view.
+
+
+2
+
+1 What Why How - To explain technical thing.
+2 Where + When - To explain technical thing.
+
+Submit window should give popup to user for what happened when user clicked submit btn.
+Complete JSON + uuid img video
+Start adding edge cases 
+5- submit sunday UI + json edge cases
+7 - libaray view
+- nuke load
+
+15 Apr
