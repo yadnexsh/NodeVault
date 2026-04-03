@@ -102,18 +102,18 @@ class NodeVault_GUI(QWidget):
         self.filter_bar.addTab(self.temp_filter, "Temp")
 
         # -------------- GIZMO GRID (inside All filter) --------------
-        self.files_grid_layout = QGridLayout()
+        # self.files_grid_layout = QGridLayout()
 
-        rows = 4
-        columns = 3
+        # rows = 4
+        # columns = 3
 
-        for row in range(rows):
-            for col in range(columns):
-                thumb = QLabel()
-                thumb.setPixmap(QPixmap(image_file))
-                self.files_grid_layout.addWidget(thumb, row, col)
+        # for row in range(rows):
+        #     for col in range(columns):
+        #         thumb = QLabel()
+        #         thumb.setPixmap(QPixmap(image_file))
+        #         self.files_grid_layout.addWidget(thumb, row, col)
 
-        self.all_filter.setLayout(self.files_grid_layout)
+        # self.all_filter.setLayout(self.files_grid_layout)
 
         # -------------- DISPLAY CONTROLS (Rows / Columns) --------------
         self.display_controls_layout = QHBoxLayout()
@@ -123,8 +123,8 @@ class NodeVault_GUI(QWidget):
         self.row_cbx = QComboBox()
         self.col_cbx = QComboBox()
 
-        MAX_ROWS = 5
-        MAX_COLS = 5
+        MAX_ROWS = 10
+        MAX_COLS = 1
 
         row_options = []
         for each in range(1, MAX_ROWS + 1):
@@ -473,7 +473,7 @@ class NodeVault_GUI(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
+    # app.setStyle("Fusion")
     window = NodeVault_GUI()
     window.show()
     sys.exit(app.exec())
