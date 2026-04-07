@@ -15,21 +15,27 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QTextEdit, 
     QFileDialog,
-    QSpacerItem
+    QSpacerItem,
+    QButtonGroup,
+    QMessageBox
 )
 from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem
 from PySide6.QtCore import Qt, Slot
 import sys
 import os
 import json
+import datetime
+import uuid
+
+ROOT_FOLDER = r"H:\Gamut\Projects\node_vault\output"
+GIZMO_FOLDER = os.path.join(ROOT_FOLDER,"Gizmos")
+TEMPLATE_FOLDER = os.path.join(ROOT_FOLDER,"Template")
+SCRIPT_FOLDER = os.path.join(ROOT_FOLDER,"Scripts")
 
 
-image_file = r"H:\Gamut\Projects\node_vault\media\heavily_compressed.png"
-STUDIO_SHARED_FOLDER = r"H:\Gamut\Projects\node_vault\env\studio_shared_folder"
-json_file = os.path.join(STUDIO_SHARED_FOLDER, "gizmo_file.json")
+THUMBNAIL_FILE = r"H:\Gamut\Projects\node_vault\media\heavily_compressed.png"
 FIXED_POLICY = QSizePolicy.Policy.Fixed
-GIZMO_PATH = r"H:\Gamut\Projects\node_vault\env\studio_shared_folder\files\Gizmos\gizmo_3_name"
-USER_NUKE_PATH = r"H:\Gamut\Projects\node_vault\env\user_nuke"
+
 
 class NodeVault_GUI(QWidget):
     def __init__(self):
@@ -37,7 +43,11 @@ class NodeVault_GUI(QWidget):
         self.setWindowTitle("Node Vault")
         self.resize(1300, 600)
         self.initUI()
-
+        self.main_file = {}
+        self.attached_images = {}
+        self.attached_video = {}
+        self.extra_docs = {}
+        
     def initUI(self):
 
         # -------------- MAIN LAYOUT --------------
@@ -54,7 +64,6 @@ class NodeVault_GUI(QWidget):
 
         self.init_library_ui()
         self.init_submit_ui()
-        self.temp_subscribe_ui()
 
         # -------------- ASSEMBLE MAIN WINDOW --------------
         self.main_layout.addWidget(self.primary_tabs)
@@ -62,7 +71,7 @@ class NodeVault_GUI(QWidget):
     def init_library_ui(self):
 
         # -------------- LIBRARY TAB LAYOUT --------------
-        self.library_layout = QHBoxLayout(self.library_tab)
+        self.library_master_layout = QHBoxLayout(self.library_tab)
 
         # -------------- CATEGORY PANEL (Tree View) --------------
         self.category_panel = QTreeView()
@@ -71,40 +80,40 @@ class NodeVault_GUI(QWidget):
         model = QStandardItemModel()
         model.setHorizontalHeaderLabels(["Category"])
 
-        template_item = QStandardItem("Templates")
-        gizmos_item = QStandardItem("Gizmos")
-        deep_item = QStandardItem("Deep")
-        image_item = QStandardItem("Image")
-        draw_item = QStandardItem("Draw")
-        time_item = QStandardItem("Time")
-        channel_item = QStandardItem("Channel")
-        filter_item = QStandardItem("Filter")
-        tricks_item = QStandardItem("Tricks")
-        misc_item = QStandardItem("Misc")
+        self.template_item = QStandardItem("Templates")
+        self.gizmos_item = QStandardItem("Gizmos")
+        self.deep_item = QStandardItem("Deep")
+        self.image_item = QStandardItem("Image")
+        self.draw_item = QStandardItem("Draw")
+        self.time_item = QStandardItem("Time")
+        self.channel_item = QStandardItem("Channel")
+        self.filter_item = QStandardItem("Filter")
+        self.tricks_item = QStandardItem("Tricks")
+        self.misc_item = QStandardItem("Misc")
 
-        model.appendRow(template_item)
+        model.appendRow(self.template_item)
 
-        model.appendRow(gizmos_item)
-        gizmos_item.appendRow(deep_item)
-        gizmos_item.appendRow(image_item)
-        gizmos_item.appendRow(draw_item)
-        gizmos_item.appendRow(time_item)
-        gizmos_item.appendRow(channel_item)
-        gizmos_item.appendRow(filter_item)
+        model.appendRow(self.gizmos_item)
+        self.gizmos_item.appendRow(self.deep_item)
+        self.gizmos_item.appendRow(self.image_item)
+        self.gizmos_item.appendRow(self.draw_item)
+        self.gizmos_item.appendRow(self.time_item)
+        self.gizmos_item.appendRow(self.channel_item)
+        self.gizmos_item.appendRow(self.filter_item)
 
-        model.appendRow(tricks_item)
-        model.appendRow(misc_item)
+        model.appendRow(self.tricks_item)
+        model.appendRow(self.misc_item)
 
         self.category_panel.setModel(model)
 
         # -------------- ACTIVE FILTER BAR --------------
-        self.filter_bar = QTabWidget()
+        self.tabs = QTabWidget()
 
-        self.all_filter = QWidget()
-        self.temp_filter = QWidget()
+        self.all_tab = QWidget()
+        self.temp_tab = QWidget()
 
-        self.filter_bar.addTab(self.all_filter, "All")
-        self.filter_bar.addTab(self.temp_filter, "Temp")
+        self.tabs.addTab(self.all_tab, "All")
+        self.tabs.addTab(self.temp_tab, "Temp")
 
         # -------------- GIZMO GRID (inside All filter) --------------
         self.files_grid_layout = QGridLayout()
@@ -115,18 +124,18 @@ class NodeVault_GUI(QWidget):
         for row in range(MAX_ROWS):
             for col in range(MAX_COLS):
                 thumb = QLabel()
-                thumb.setPixmap(QPixmap(image_file))
+                thumb.setPixmap(QPixmap(THUMBNAIL_FILE))
                 self.files_grid_layout.addWidget(thumb, row, col)
 
-        self.all_filter.setLayout(self.files_grid_layout)
+        self.all_tab.setLayout(self.files_grid_layout)
 
         # -------------- CONTENT AREA LAYOUT  --------------
         self.right_panel_layout = QVBoxLayout()
-        self.right_panel_layout.addWidget(self.filter_bar)
+        self.right_panel_layout.addWidget(self.tabs)
 
         # -------------- ASSEMBLE LIBRARY TAB --------------
-        self.library_layout.addWidget(self.category_panel)
-        self.library_layout.addLayout(self.right_panel_layout)
+        self.library_master_layout.addWidget(self.category_panel)
+        self.library_master_layout.addLayout(self.right_panel_layout)
 
 
     def init_submit_ui(self):
@@ -134,7 +143,6 @@ class NodeVault_GUI(QWidget):
         # -------------- MASTER SUBMIT LAYOUT --------------
         self.submit_master_layout = QVBoxLayout(self.submit_tab)
         
-        # 1. Main Title at top left
         self.submit_lbl = QLabel("Submit to Dataset")
         title_font = self.submit_lbl.font()
         title_font.setPointSize(14)
@@ -149,13 +157,8 @@ class NodeVault_GUI(QWidget):
         self.main_left_box = QVBoxLayout()
         self.main_right_box = QVBoxLayout()
 
-
-
-        # ========== CREATE ALL WIDGETS  ======================
-        
-
         # -------- Information Box ---------------
-        self.information_box = QGroupBox("")
+        self.information_box = QGroupBox("Basic Info")
         self.information_box_layout = QHBoxLayout(self.information_box)
 
         left_form = QFormLayout()
@@ -177,14 +180,19 @@ class NodeVault_GUI(QWidget):
         # ------------- File Type Box -----------
         self.filetype_box = QGroupBox("File Types")
         self.filetype_box_layout = QHBoxLayout(self.filetype_box) 
-
+        
+        self.filetype_bg = QButtonGroup(self)
+        self.filetype_bg.setExclusive(True)
+        
         self.gizmo_btn = QPushButton("Gizmo")
         self.script_btn = QPushButton("Script")
         self.template_btn = QPushButton("Template")
-
-        self.filetype_box_layout.addWidget(self.gizmo_btn)
-        self.filetype_box_layout.addWidget(self.script_btn)
-        self.filetype_box_layout.addWidget(self.template_btn)
+        
+        # Making The buttons Clickable
+        for btn in [self.gizmo_btn, self.script_btn, self.template_btn]:
+            btn.setCheckable(True)
+            self.filetype_bg.addButton(btn)
+            self.filetype_box_layout.addWidget(btn)
 
         # ------------- Main File Box -----------
         file_group = QGroupBox("Main File")
@@ -207,36 +215,47 @@ class NodeVault_GUI(QWidget):
         self.sub_category_box = QGroupBox("Sub Category")
         self.sub_category_layout = QHBoxLayout(self.sub_category_box)
 
-        self.btn_deep    = QPushButton("Deep")
-        self.btn_draw    = QPushButton("Draw")
-        self.btn_time    = QPushButton("Time")
-        self.btn_image   = QPushButton("Image")
+        self.subcategory_bg = QButtonGroup(self)
+        self.btn_deep = QPushButton("Deep")
+        self.btn_draw = QPushButton("Draw")
+        self.btn_time = QPushButton("Time")
+        self.btn_image = QPushButton("Image")
         self.btn_channel = QPushButton("Channel")
-        self.btn_filter  = QPushButton("Filter")
-
-        self.sub_category_layout.addWidget(self.btn_deep)
-        self.sub_category_layout.addWidget(self.btn_draw)
-        self.sub_category_layout.addWidget(self.btn_time)
-        self.sub_category_layout.addWidget(self.btn_image)
-        self.sub_category_layout.addWidget(self.btn_channel)
-        self.sub_category_layout.addWidget(self.btn_filter)
-
+        self.btn_filter = QPushButton("Filter")
+        
+        # Making The buttons Clickable
+        for btn in [self.btn_deep, self.btn_draw, self.btn_time, self.btn_image, self.btn_channel, self.btn_filter]:
+            btn.setCheckable(True)
+            self.subcategory_bg.addButton(btn)
+            self.sub_category_layout.addWidget(btn)
+            
         # --- Render + Nuke Version  ---
         self.render_nuke_layout = QHBoxLayout()
 
         self.render_box = QGroupBox("Render")
         self.render_box_layout = QHBoxLayout(self.render_box)
+        
+        self.render_bg = QButtonGroup(self)
         self.btn_cpu = QPushButton("CPU")
         self.btn_gpu = QPushButton("GPU")
-        self.render_box_layout.addWidget(self.btn_cpu)
-        self.render_box_layout.addWidget(self.btn_gpu)
+        
+        for btn in [self.btn_cpu, self.btn_gpu]:
+            btn.setCheckable(True)
+            self.render_bg.addButton(btn)
+            self.render_box_layout.addWidget(btn)
 
         self.nuke_box = QGroupBox("Nuke Version")
         self.nuke_box_layout = QHBoxLayout(self.nuke_box)
+        
+        self.nuke_bg = QButtonGroup(self)
         self.btn_nuke_old = QPushButton("Nuke13-")
         self.btn_nuke_new = QPushButton("Nuke13+")
-        self.nuke_box_layout.addWidget(self.btn_nuke_old)
-        self.nuke_box_layout.addWidget(self.btn_nuke_new)
+        
+        # Making The buttons Clickable
+        for btn in [self.btn_nuke_old, self.btn_nuke_new]:
+            btn.setCheckable(True)
+            self.nuke_bg.addButton(btn)
+            self.nuke_box_layout.addWidget(btn)
 
         self.render_nuke_layout.addWidget(self.render_box)
         self.render_nuke_layout.addWidget(self.nuke_box)
@@ -245,13 +264,6 @@ class NodeVault_GUI(QWidget):
         self.docs_box = QGroupBox("Docs")
         self.docs_box_layout = QVBoxLayout(self.docs_box)
 
-        readme_row = QHBoxLayout()
-        self.readme_lbl = QLabel("No file")
-        self.readme_browse_btn = QPushButton("Browse README.md")
-        self.readme_browse_btn.clicked.connect(self.on_readme_browse_clicked)
-        readme_row.addWidget(QLabel("README:"))
-        readme_row.addWidget(self.readme_lbl)
-        readme_row.addWidget(self.readme_browse_btn)
 
         extra1_row = QHBoxLayout()
         self.extra1_lbl = QLabel("No file")
@@ -268,8 +280,7 @@ class NodeVault_GUI(QWidget):
         extra2_row.addWidget(QLabel("Extra Doc 2:"))
         extra2_row.addWidget(self.extra2_lbl)
         extra2_row.addWidget(self.extra2_browse_btn)
-
-        self.docs_box_layout.addLayout(readme_row)
+        
         self.docs_box_layout.addLayout(extra1_row)
         self.docs_box_layout.addLayout(extra2_row)
 
@@ -280,15 +291,15 @@ class NodeVault_GUI(QWidget):
         left_link_form = QFormLayout()
         right_link_form = QFormLayout()
 
-        self.link_1 = QLineEdit()
-        self.link_2 = QLineEdit()
-        self.link_3 = QLineEdit()
-        self.link_4 = QLineEdit()
+        self.repo_link = QLineEdit()
+        self.issues_link = QLineEdit()
+        self.website_link = QLineEdit()
+        self.extra_link = QLineEdit()
 
-        left_link_form.addRow("Repo:", self.link_1)
-        left_link_form.addRow("Issues:", self.link_2)
-        right_link_form.addRow("Website:", self.link_3)
-        right_link_form.addRow("Extra:", self.link_4)
+        left_link_form.addRow("Repo:", self.repo_link)
+        left_link_form.addRow("Issues:", self.issues_link)
+        right_link_form.addRow("Website:", self.website_link)
+        right_link_form.addRow("Extra:", self.extra_link)
 
         self.external_box_layout.addLayout(left_link_form)
         self.external_box_layout.addLayout(right_link_form)
@@ -312,6 +323,7 @@ class NodeVault_GUI(QWidget):
         self.preview_btn_4.setFixedSize(square_size, square_size)
         self.preview_btn_5.setFixedSize(square_size, square_size)
         self.demo_video_btn.setFixedSize(square_size, square_size)
+        
         # ---------------------------
 
         self.preview_btn_1.clicked.connect(self.on_preview_btn_1_clicked)
@@ -329,7 +341,7 @@ class NodeVault_GUI(QWidget):
         self.media_box_layout.addWidget(self.demo_video_btn, 1, 2)
 
 
-        # ================ ASSEMBLE LEFT COLUMN ================================
+        #---
 
         self.main_left_box.addWidget(self.information_box)
         self.main_left_box.addWidget(self.filetype_box)
@@ -342,11 +354,10 @@ class NodeVault_GUI(QWidget):
         self.main_left_box.addWidget(self.sub_category_box)
         self.main_left_box.addLayout(self.render_nuke_layout)
         
-        v_spacer_left = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        v_spacer_left = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)       # W H hdata policy and vdata policy
         self.main_left_box.addItem(v_spacer_left) 
 
-
-# ================ ASSEMBLE RIGHT COLUMN ================================
+# ++++
         self.main_right_box.addWidget(self.docs_box)
         self.main_right_box.addWidget(self.external_box)
         self.main_right_box.addWidget(self.media_box)
@@ -360,17 +371,19 @@ class NodeVault_GUI(QWidget):
         btn_font = self.btn_submit.font()
         btn_font.setBold(True)
         self.btn_submit.setFont(btn_font)
+        
+        self.btn_submit.clicked.connect(self.on_submit_clicked)
 
 
-# ================ FINAL LAYOUT ASSEMBLE ================================
+# ----
         self.columns_layout.addLayout(self.main_left_box)
         self.columns_layout.addLayout(self.main_right_box)
         
         self.submit_master_layout.addLayout(self.columns_layout)
         
-        self.submit_master_layout.addWidget(self.btn_submit, alignment=Qt.AlignCenter)
+        self.submit_master_layout.addWidget(self.btn_submit, alignment = Qt.AlignCenter)
 
-
+# TEMP
     def temp_subscribe_ui(self):
         subscribe_tab = QWidget()
         subscribe_tab_layout = QHBoxLayout(subscribe_tab)
@@ -379,103 +392,157 @@ class NodeVault_GUI(QWidget):
         self.primary_tabs.addTab(subscribe_tab, "Sub")
 
 
-    # SLOTS
+#------
+    # ***************** COMMON FUNC *******************
 
-    @Slot()
+    def on_img_btn_clicked(self, button):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Preview Image", "",
+            "Images (*.png *.jpg *.jpeg);;All files (*)"
+        )
+        if path:
+            filename = os.path.basename(path)
+            button.setText(filename)
+            self.attached_images[filename] = path
+
+    def on_video_btn_clicked(self, button):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Demo Video", "",
+            "Video (*.mp4 *.mov *.avi);;All files (*)"
+        )
+        if path:
+            filename = os.path.basename(path)
+            button.setText(filename)
+            self.attached_video[filename] = path
+
+    def on_doc_btn_clicked(self, button):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select Extra Document", "",
+            "PDF (*.pdf);;All files (*)"
+        )
+        if path:
+            filename = os.path.basename(path)
+            button.setText(filename)
+            self.extra_docs[filename] = path
+            
+    # *********** UPDATE GUI > LABEL / STATUS  ******************
+    
+    # ------- Label Update : IMAGE & VIDEO BOX -----------
+    def on_preview_btn_1_clicked(self):
+        self.on_img_btn_clicked(self.preview_btn_1)
+
+        
+    def on_preview_btn_2_clicked(self):
+        self.on_img_btn_clicked(self.preview_btn_2)
+
+    def on_preview_btn_3_clicked(self):
+        self.on_img_btn_clicked(self.preview_btn_3)
+        
+    def on_preview_btn_4_clicked(self):
+        self.on_img_btn_clicked(self.preview_btn_4)
+        
+    def on_preview_btn_5_clicked(self):
+        self.on_img_btn_clicked(self.preview_btn_5)
+    
+    def on_demo_video_btn_clicked(self):
+        self.on_video_btn_clicked(self.demo_video_btn)
+
+    # ------- Label Update : Main File -----------
     def on_file_browse_clicked(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Main File", "",
             "Nuke files (*.gizmo *.py *.nk);;All files (*)"
         )
         if path:
-            self.file_label.setText(os.path.basename(path))
+            filename = os.path.basename(path)
+            self.file_label.setText(filename)
             
-    @Slot()
-    def on_readme_browse_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select README", "",
-            "Markdown (*.md);;Text (*.txt);;All files (*)"
-        )
-        if path:
-            self.readme_lbl.setText(os.path.basename(path))
-            
-            
-    @Slot()
+    # ------- Label Update : Extra Docs  -----------
+    
     def on_extra1_browse_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Extra Doc 1", "",
-            "PDF (*.pdf);;All files (*)"
-        )
-        if path:
-            self.extra1_lbl.setText(os.path.basename(path))
-
-    @Slot()
+        self.on_doc_btn_clicked(self.extra1_lbl)
+        
     def on_extra2_browse_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Extra Doc 2", "",
-            "PDF (*.pdf);;All files (*)"
-        )
-        if path:
-            self.extra2_lbl.setText(os.path.basename(path))
+        self.on_doc_btn_clicked(self.extra2_lbl)
+        
+    def save_json(self):
+        submission_id = str(uuid.uuid4())
+        submiited_time = datetime.datetime.now().isoformat(timespec='seconds')
+        filetype = "Unknown"
+        if self.filetype_bg.checkedButton():
+            filetype = self.filetype_bg.checkedButton().text()
+            if filetype == "Gizmo":
+                save_dir = os.path.join(GIZMO_FOLDER, submission_id)
+            if filetype == "Script":
+                save_dir = os.path.join(SCRIPT_FOLDER, submission_id)
+            if filetype == "Template":
+                save_dir = os.path.join(TEMPLATE_FOLDER, submission_id)
+        else:
+            QMessageBox.information(self, "Info", "Select the filetype")
+            
+        filename = self.filename_le.text()
+        author = self.author_le.text()
+        version = self.version_le.text() or "v001"
 
+        sub_category = "Unknown"
+        if self.subcategory_bg.checkedButton():
+            sub_category = self.subcategory_bg.checkedButton().text()
+        else:
+            QMessageBox.information(self, "Info", "Select the Sub Category")    
+            
+        render_type = "Unknown"
+        if self.render_bg.checkedButton():
+            render_type = self.render_bg.checkedButton().text()
+        else:
+            QMessageBox.information(self, "Info", "Select the Render Type")
 
-    @Slot()
-    def on_preview_btn_1_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Preview Image 1", "",
-            "Images (*.png *.jpg *.jpeg);;All files (*)"
-        )
-        if path:
-            self.preview_btn_1.setText(os.path.basename(path))
-
-    @Slot()
-    def on_preview_btn_2_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Preview Image 2", "",
-            "Images (*.png *.jpg *.jpeg);;All files (*)"
-        )
-        if path:
-            self.preview_btn_2.setText(os.path.basename(path))
-
-    
-    @Slot()
-    def on_preview_btn_3_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Preview Image 3", "",
-            "Images (*.png *.jpg *.jpeg);;All files (*)"
-        )
-        if path:
-            self.preview_btn_3.setText(os.path.basename(path))
-
-    
-    @Slot()
-    def on_preview_btn_4_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Preview Image 4", "",
-            "Images (*.png *.jpg *.jpeg);;All files (*)"
-        )
-        if path:
-            self.preview_btn_4.setText(os.path.basename(path))
-
-    
-    @Slot()
-    def on_preview_btn_5_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Preview Image 5", "",
-            "Images (*.png *.jpg *.jpeg);;All files (*)"
-        )
-        if path:
-            self.preview_btn_5.setText(os.path.basename(path))
-
-    @Slot()
-    def on_demo_video_btn_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Demo Video", "",
-            "Video (*.mp4 *.mov *.avi);;All files (*)"
-        )
-        if path:
-            self.demo_video_btn.setText(os.path.basename(path))
-
+        nuke_version = "Unknown"
+        if self.nuke_bg.checkedButton():
+            nuke_version = self.nuke_bg.checkedButton().text()
+        else:
+            QMessageBox.information(self, "Info", "Select the Nuke Version")   
+            
+        description = self.desc_edit.toPlainText()
+        tagline = self.tagline_le.text()
+        
+        repo_link = self.repo_link.text()
+        issues_link = self.issues_link.text()
+        website_link = self.website_link.text()
+        extra_link = self.extra_link.text()
+        
+        data = {
+            "uuid": submission_id,
+            "submiited": submiited_time,
+            "filetype": filetype,
+            "filename": filename,
+            "author": author,
+            "version": version,
+            "sub_category": sub_category,
+            "render": render_type,
+            "nuke_version": nuke_version,
+            "description": description ,
+            "tagline": tagline ,
+            "extra_docs": self.extra_docs,
+            "repo_link": repo_link,
+            "issues_link": issues_link,
+            "website": website_link,
+            "extra_link": extra_link,
+            "attached_images": self.attached_images,
+            "attached_video": self.attached_video
+        }
+        
+        # Make Folder for Json File & Write JSON in it
+        os.makedirs(save_dir, exist_ok=True)
+        json_filename = os.path.join(save_dir, f"{submission_id}.json")
+        try:
+            with open(json_filename, "w") as file:
+                json.dump(data, file, indent=4)
+                QMessageBox.information(self, "Info", "The file has been submitted successfully.")
+        except Exception as e:
+            print(f"Error > {e}")
+        
+    def on_submit_clicked(self):
+        self.save_json()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

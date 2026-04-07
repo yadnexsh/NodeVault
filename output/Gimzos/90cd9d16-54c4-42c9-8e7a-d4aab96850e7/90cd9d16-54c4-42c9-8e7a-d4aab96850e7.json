@@ -1,0 +1,26 @@
+{
+    "uuid": "90cd9d16-54c4-42c9-8e7a-d4aab96850e7",
+    "submiited": "2026-04-07T17:52:53",
+    "filetype": "Gizmo",
+    "filename": "1",
+    "author": "231",
+    "version": "213",
+    "sub_category": "Deep",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "121322313",
+    "tagline": "312",
+    "extra_docs": {
+        "original.png": "H:/Gamut/Projects/node_vault/media/original.png"
+    },
+    "repo_link": "213",
+    "issues_link": "312",
+    "website": "312",
+    "extra_link": "123",
+    "attached_images": {
+        "heavily_compressed.png": "H:/Gamut/Projects/node_vault/media/heavily_compressed.png"
+    },
+    "attached_video": {
+        "original.png": "H:/Gamut/Projects/node_vault/media/original.png"
+    }
+}
