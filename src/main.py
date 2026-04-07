@@ -533,6 +533,7 @@ class NodeVault_GUI(QWidget):
         
         # Make Folder for Json File & Write JSON in it
         os.makedirs(save_dir, exist_ok=True)
+        print(save_dir)
         json_filename = os.path.join(save_dir, f"{submission_id}.json")
         try:
             with open(json_filename, "w") as file:
