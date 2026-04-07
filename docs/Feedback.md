@@ -26,3 +26,10 @@ Start adding edge cases
 - nuke load
 
 15 Apr
+
+1 change dicts to list in json file
+2 combine pop messges in 1 - 
+3 git workflow branches - avoid
+4 fix gizmo folder creation in other branch
+5 create inital folders at the start of UI
+6 Remove thumbnails and push it to form layout
