@@ -1,0 +1,25 @@
+{
+    "uuid": "98dd189b-7da9-4333-b453-d021130c4a55",
+    "submiited": "2026-04-08T01:33:55",
+    "filetype": "Gizmo",
+    "filename": "2",
+    "author": "",
+    "version": "v001",
+    "sub_category": "Image",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "",
+    "tagline": "",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/media/original.png",
+        "H:/Gamut/Projects/node_vault/media/compressed.png"
+    ],
+    "repo_link": "",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/media/original.png"
+    ],
+    "attached_video": []
+}

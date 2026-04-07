@@ -43,10 +43,10 @@ class NodeVault_GUI(QWidget):
         self.setWindowTitle("Node Vault")
         self.resize(1300, 600)
         self.initUI()
-        self.main_file = {}
-        self.attached_images = {}
-        self.attached_video = {}
-        self.extra_docs = {}
+        self.main_file = []
+        self.attached_images = []
+        self.attached_video = []
+        self.extra_docs = []
         
     def initUI(self):
 
@@ -403,7 +403,7 @@ class NodeVault_GUI(QWidget):
         if path:
             filename = os.path.basename(path)
             button.setText(filename)
-            self.attached_images[filename] = path
+            self.attached_images.append(path)
 
     def on_video_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
@@ -413,7 +413,7 @@ class NodeVault_GUI(QWidget):
         if path:
             filename = os.path.basename(path)
             button.setText(filename)
-            self.attached_video[filename] = path
+            self.attached_video.append(path)
 
     def on_doc_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
@@ -423,7 +423,7 @@ class NodeVault_GUI(QWidget):
         if path:
             filename = os.path.basename(path)
             button.setText(filename)
-            self.extra_docs[filename] = path
+            self.extra_docs.append(path)
             
     # *********** UPDATE GUI > LABEL / STATUS  ******************
     
