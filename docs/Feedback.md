@@ -18,7 +18,7 @@
 1 What Why How - To explain technical thing.
 2 Where + When - To explain technical thing.
 
-Submit window should give popup to user for what happened when user clicked submit btn.
+Submit window should give popup to user for what happened when user clicked submit btn. - Done
 Complete JSON + uuid img video
 Start adding edge cases 
 5- submit sunday UI + json edge cases
