@@ -208,7 +208,7 @@ class NodeVault_GUI(QWidget):
         desc_layout = QVBoxLayout(desc_group)
         self.desc_edit = QTextEdit()
         self.desc_edit.setPlaceholderText("Enter description…")
-        self.desc_edit.setFixedHeight(80)
+        # self.desc_edit.setFixedHeight(80)
         desc_layout.addWidget(self.desc_edit)
 
         # --- Sub-Category Options  ---
@@ -354,16 +354,16 @@ class NodeVault_GUI(QWidget):
         self.main_left_box.addWidget(self.sub_category_box)
         self.main_left_box.addLayout(self.render_nuke_layout)
         
-        v_spacer_left = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)       # W H hdata policy and vdata policy
-        self.main_left_box.addItem(v_spacer_left) 
+        # v_spacer_left = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)       # W H hdata policy and vdata policy
+        # self.main_left_box.addItem(v_spacer_left) 
 
 # ++++
         self.main_right_box.addWidget(self.docs_box)
         self.main_right_box.addWidget(self.external_box)
         self.main_right_box.addWidget(self.media_box)
         
-        v_spacer_right = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
-        self.main_right_box.addItem(v_spacer_right) 
+        # v_spacer_right = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        # self.main_right_box.addItem(v_spacer_right) 
         
         self.btn_submit = QPushButton("SUBMIT")
         self.btn_submit.setMinimumHeight(40) 
@@ -382,7 +382,7 @@ class NodeVault_GUI(QWidget):
         self.submit_master_layout.addLayout(self.columns_layout)
         
         self.submit_master_layout.addWidget(self.btn_submit, alignment = Qt.AlignCenter)
-
+        self.submit_master_layout.addStretch()
 # TEMP
     def temp_subscribe_ui(self):
         subscribe_tab = QWidget()
@@ -533,6 +533,7 @@ class NodeVault_GUI(QWidget):
         
         # Make Folder for Json File & Write JSON in it
         os.makedirs(save_dir, exist_ok=True)
+        print(save_dir)
         json_filename = os.path.join(save_dir, f"{submission_id}.json")
         try:
             with open(json_filename, "w") as file:

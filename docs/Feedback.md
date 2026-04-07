@@ -19,8 +19,8 @@
 2 Where + When - To explain technical thing.
 
 Submit window should give popup to user for what happened when user clicked submit btn. - Done
-Complete JSON + uuid img video
-Start adding edge cases 
+Complete JSON + uuid img video - Done Creates json now in required folders
+Start adding edge cases - Pending Lil
 5- submit sunday UI + json edge cases
 7 - libaray view
 - nuke load
