@@ -208,7 +208,7 @@ class NodeVault_GUI(QWidget):
         desc_layout = QVBoxLayout(desc_group)
         self.desc_edit = QTextEdit()
         self.desc_edit.setPlaceholderText("Enter description…")
-        self.desc_edit.setFixedHeight(80)
+        # self.desc_edit.setFixedHeight(80)
         desc_layout.addWidget(self.desc_edit)
 
         # --- Sub-Category Options  ---
