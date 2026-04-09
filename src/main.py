@@ -19,8 +19,8 @@ from PySide6.QtWidgets import (
     QButtonGroup,
     QMessageBox
 )
-from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem, QIcon
+from PySide6.QtCore import Qt, Slot, QSize
 import sys
 import os
 import json
@@ -28,17 +28,27 @@ import datetime
 import uuid
 import shutil
 
-ROOT_FOLDER = r"H:\Gamut\Projects\node_vault\output"
-GIZMO_FOLDER = os.path.join(ROOT_FOLDER,"Gizmos")
-TEMPLATE_FOLDER = os.path.join(ROOT_FOLDER,"Template")
-SCRIPT_FOLDER = os.path.join(ROOT_FOLDER,"Scripts")
+ROOT_FOLDER = r"H:\Gamut\Projects\node_vault"
+
+MEDIA_FOLDER = os.path.join(ROOT_FOLDER, "media")
+ICON_FOLDER = os.path.join(MEDIA_FOLDER, "icons")
+
+OUTPUT_FOLDER = os.path.join(ROOT_FOLDER, "output")
+GIZMO_FOLDER = os.path.join(OUTPUT_FOLDER,"Gizmos")
+TEMPLATE_FOLDER = os.path.join(OUTPUT_FOLDER,"Template")
+SCRIPT_FOLDER = os.path.join(OUTPUT_FOLDER,"Scripts")
+
 USERNAME = os.getlogin()
 
-THUMBNAIL_FILE = r"H:\Gamut\Projects\node_vault\media\heavily_compressed.png"
+THUMBNAIL_FILE = os.path.join(MEDIA_FOLDER, "heavily_compressed.png")
+IMAGE_ICON_PATH = os.path.join(ICON_FOLDER, "image_icon.png")
+VIDEO_ICON_PATH = os.path.join(ICON_FOLDER, "video_icon.png")
+
 FIXED_POLICY = QSizePolicy.Policy.Fixed
 
 
 class NodeVault_GUI(QWidget):
+    
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Node Vault")
@@ -52,7 +62,6 @@ class NodeVault_GUI(QWidget):
             print(f"Script Folder created > {SCRIPT_FOLDER}")
         except Exception as e:
             print(f"{e}")
-            
             
         self.initUI()
         self.main_file = []
@@ -319,16 +328,25 @@ class NodeVault_GUI(QWidget):
 
         # -------- Preview Images + Demo Video -----------
         self.media_box = QGroupBox("Preview Images & Demo Video")
-        self.media_box_layout = QGridLayout(self.media_box)
+        self.media_box_layout = QHBoxLayout(self.media_box)
+        self.image_icon = QIcon(IMAGE_ICON_PATH)
+        self.video_icon = QIcon(VIDEO_ICON_PATH)
 
-        self.preview_btn_1 = QPushButton("Img 1")
-        self.preview_btn_2 = QPushButton("Img 2")
-        self.preview_btn_3 = QPushButton("Img 3")
-        self.preview_btn_4 = QPushButton("Img 4")
-        self.preview_btn_5 = QPushButton("Img 5")
-        self.demo_video_btn = QPushButton("Demo Video")
-
-        square_size = 65
+        self.preview_btn_1 = QPushButton()
+        self.preview_btn_2 = QPushButton()
+        self.preview_btn_3 = QPushButton()
+        self.preview_btn_4 = QPushButton()
+        self.preview_btn_5 = QPushButton()
+        self.demo_video_btn = QPushButton()
+        add_image_buttons = [self.preview_btn_1,self.preview_btn_2,self.preview_btn_3,self.preview_btn_4,self.preview_btn_5]
+        for each_image_btn in add_image_buttons:
+            each_image_btn.setIcon(self.image_icon)
+            each_image_btn.setIconSize(QSize(50, 50))
+            
+        self.demo_video_btn.setIcon(self.video_icon)
+        self.demo_video_btn.setIconSize(QSize(50, 50))
+        
+        square_size = 100
         
         self.preview_btn_1.setFixedSize(square_size, square_size)
         self.preview_btn_2.setFixedSize(square_size, square_size)
@@ -346,12 +364,9 @@ class NodeVault_GUI(QWidget):
         self.preview_btn_5.clicked.connect(self.on_preview_btn_5_clicked)
         self.demo_video_btn.clicked.connect(self.on_demo_video_btn_clicked)
 
-        self.media_box_layout.addWidget(self.preview_btn_1, 0, 0)
-        self.media_box_layout.addWidget(self.preview_btn_2, 0, 1)
-        self.media_box_layout.addWidget(self.preview_btn_3, 0, 2)
-        self.media_box_layout.addWidget(self.preview_btn_4, 1, 0)
-        self.media_box_layout.addWidget(self.preview_btn_5, 1, 1)
-        self.media_box_layout.addWidget(self.demo_video_btn, 1, 2)
+        for each in add_image_buttons:
+            self.media_box_layout.addWidget(each)
+        self.media_box_layout.addWidget(self.demo_video_btn)
 
 
         #---
@@ -396,13 +411,7 @@ class NodeVault_GUI(QWidget):
         
         self.submit_master_layout.addWidget(self.btn_submit, alignment = Qt.AlignCenter)
         self.submit_master_layout.addStretch()
-# TEMP
-    def temp_subscribe_ui(self):
-        subscribe_tab = QWidget()
-        subscribe_tab_layout = QHBoxLayout(subscribe_tab)
-        self.btn_subscribe = QPushButton("Subs")
-        subscribe_tab_layout.addWidget(self.btn_subscribe)
-        self.primary_tabs.addTab(subscribe_tab, "Sub")
+
 
 
 #------
@@ -415,7 +424,11 @@ class NodeVault_GUI(QWidget):
         )
         if path:
             filename = os.path.basename(path)
-            button.setText(filename)
+            print(path)
+            thumbnail = QIcon(path)
+            button.setIcon(thumbnail)
+            button.setIconSize(QSize(100, 100))
+            # button.setText(filename)
             self.attached_images.append(path)
 
     def on_video_btn_clicked(self, button):
@@ -596,12 +609,6 @@ class NodeVault_GUI(QWidget):
             QMessageBox.information(self, "Info", "The file has been submitted successfully.")
         except Exception as e:
             print(f"Error > {e}")
-            
-
-        
-
-            
-
         
     def on_submit_clicked(self):
         self.save_json()
