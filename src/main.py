@@ -26,12 +26,13 @@ import os
 import json
 import datetime
 import uuid
+import shutil
 
 ROOT_FOLDER = r"H:\Gamut\Projects\node_vault\output"
 GIZMO_FOLDER = os.path.join(ROOT_FOLDER,"Gizmos")
 TEMPLATE_FOLDER = os.path.join(ROOT_FOLDER,"Template")
 SCRIPT_FOLDER = os.path.join(ROOT_FOLDER,"Scripts")
-
+USERNAME = os.getlogin()
 
 THUMBNAIL_FILE = r"H:\Gamut\Projects\node_vault\media\heavily_compressed.png"
 FIXED_POLICY = QSizePolicy.Policy.Fixed
@@ -168,7 +169,8 @@ class NodeVault_GUI(QWidget):
         self.author_le = QLineEdit()
         self.version_le = QLineEdit()
         self.tagline_le = QLineEdit()
-
+        self.author_le.setPlaceholderText(USERNAME)
+        self.author_le.setReadOnly(True)
         left_form.addRow("File Name:", self.filename_le)
         left_form.addRow("Version:", self.version_le)
         right_form.addRow("Author:", self.author_le)
@@ -466,42 +468,55 @@ class NodeVault_GUI(QWidget):
         self.on_doc_btn_clicked(self.extra2_lbl)
         
     def save_json(self):
+        
+        # -------- VALIDATE FIRST --------
+
+        if not self.filetype_bg.checkedButton():
+            QMessageBox.warning(self, "Missing Field", "Please select a File Type.")
+            return
+
+        if not self.subcategory_bg.checkedButton():
+            QMessageBox.warning(self, "Missing Field", "Please select a Sub Category.")
+            return
+
+        if not self.render_bg.checkedButton():
+            QMessageBox.warning(self, "Missing Field", "Please select a Render Type.")
+            return
+
+        if not self.nuke_bg.checkedButton():
+            QMessageBox.warning(self, "Missing Field", "Please select a Nuke Version.")
+            return
+
+        if not self.filename_le.text().strip():
+            QMessageBox.warning(self, "Missing Field", "Please enter a File Name.")
+            return
+
+        if not self.author_le.text().strip():
+            QMessageBox.warning(self, "Missing Field", "Please enter an Author name.")
+            return
+        
         submission_id = str(uuid.uuid4())
-        submiited_time = datetime.datetime.now().isoformat(timespec='seconds')
-        filetype = "Unknown"
-        if self.filetype_bg.checkedButton():
-            filetype = self.filetype_bg.checkedButton().text()
-            if filetype == "Gizmo":
-                save_dir = os.path.join(GIZMO_FOLDER, submission_id)
-            if filetype == "Script":
-                save_dir = os.path.join(SCRIPT_FOLDER, submission_id)
-            if filetype == "Template":
-                save_dir = os.path.join(TEMPLATE_FOLDER, submission_id)
-        else:
-            QMessageBox.information(self, "Info", "Select the filetype")
-            
-        filename = self.filename_le.text()
+
+        filetype = self.filetype_bg.checkedButton().text()
+        folder_map = {
+            "Gizmo" : GIZMO_FOLDER,
+            "Scripts" : SCRIPT_FOLDER,
+            "Template" : TEMPLATE_FOLDER
+        }
+        save_dir = os.path.join(folder_map[filetype], submission_id)
+        
+        submitted_time = datetime.datetime.now().isoformat(timespec='seconds')
+
+        filetype = self.filetype_bg.checkedButton().text()
+        filename = self.filename_le.text().strip()
         author = self.author_le.text()
-        version = self.version_le.text() or "v001"
-
-        sub_category = "Unknown"
-        if self.subcategory_bg.checkedButton():
-            sub_category = self.subcategory_bg.checkedButton().text()
-        else:
-            QMessageBox.information(self, "Info", "Select the Sub Category")    
-            
-        render_type = "Unknown"
-        if self.render_bg.checkedButton():
-            render_type = self.render_bg.checkedButton().text()
-        else:
-            QMessageBox.information(self, "Info", "Select the Render Type")
-
-        nuke_version = "Unknown"
-        if self.nuke_bg.checkedButton():
-            nuke_version = self.nuke_bg.checkedButton().text()
-        else:
-            QMessageBox.information(self, "Info", "Select the Nuke Version")   
-            
+        version = self.version_le.text().strip() or "v001"
+        sub_category = self.subcategory_bg.checkedButton().text()
+        render_type = self.render_bg.checkedButton().text()
+        nuke_version = self.nuke_bg.checkedButton().text()
+        description = self.desc_edit.toPlainText().strip()
+        tagline = self.tagline_le.text().strip() 
+                
         description = self.desc_edit.toPlainText()
         tagline = self.tagline_le.text()
         
@@ -512,7 +527,7 @@ class NodeVault_GUI(QWidget):
         
         data = {
             "uuid": submission_id,
-            "submiited": submiited_time,
+            "submiited": submitted_time,
             "filetype": filetype,
             "filename": filename,
             "author": author,
@@ -541,6 +556,23 @@ class NodeVault_GUI(QWidget):
                 QMessageBox.information(self, "Info", "The file has been submitted successfully.")
         except Exception as e:
             print(f"Error > {e}")
+        
+        for docs_file in data["extra_docs"]:
+            docs_folder = os.path.join(save_dir, "Docs")
+            os.makedirs(image_folder, exist_ok=True)
+            shutil.copy(src=docs_file, dst=docs_folder)
+            
+        for image_file in data["attached_images"]:
+            image_folder = os.path.join(save_dir, "Images")
+            os.makedirs(image_folder, exist_ok=True)
+            shutil.copy(src=image_file, dst=image_folder)
+            
+        for video_file in data["attached_video"]:
+            video_folder = os.path.join(save_dir, "Videos")
+            os.makedirs(video_folder, exist_ok=True)
+            shutil.copy(src=video_file, dst=video_folder)
+            
+
         
     def on_submit_clicked(self):
         self.save_json()
