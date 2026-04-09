@@ -451,13 +451,15 @@ class NodeVault_GUI(QWidget):
 
     # ------- Label Update : Main File -----------
     def on_file_browse_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Main File", "",
-            "Nuke files (*.gizmo *.py *.nk);;All files (*)"
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, 
+            "Select Main File", 
+            "", 
+            "All Files (*);;Python Files (*.py);;Nuke Files (*.nk)"
         )
-        if path:
-            filename = os.path.basename(path)
-            self.file_label.setText(filename)
+        if file_path:
+            self.main_file = [file_path]
+            self.file_label.setText(os.path.basename(file_path))      
             
     # ------- Label Update : Extra Docs  -----------
     
@@ -469,8 +471,11 @@ class NodeVault_GUI(QWidget):
         
     def save_json(self):
         
-        # -------- VALIDATE FIRST --------
-
+        # -------- VALIDATE INPUTS ------------
+        if not self.main_file:
+            QMessageBox.warning(self, "Missing Field", "Please select a Main File.")
+            return
+        
         if not self.filetype_bg.checkedButton():
             QMessageBox.warning(self, "Missing Field", "Please select a File Type.")
             return
@@ -497,17 +502,18 @@ class NodeVault_GUI(QWidget):
         
         submission_id = str(uuid.uuid4())
 
+        
         filetype = self.filetype_bg.checkedButton().text()
         folder_map = {
             "Gizmo" : GIZMO_FOLDER,
-            "Scripts" : SCRIPT_FOLDER,
+            "Script" : SCRIPT_FOLDER,
             "Template" : TEMPLATE_FOLDER
         }
+        
         save_dir = os.path.join(folder_map[filetype], submission_id)
         
         submitted_time = datetime.datetime.now().isoformat(timespec='seconds')
 
-        filetype = self.filetype_bg.checkedButton().text()
         filename = self.filename_le.text().strip()
         author = self.author_le.text()
         version = self.version_le.text().strip() or "v001"
@@ -516,9 +522,6 @@ class NodeVault_GUI(QWidget):
         nuke_version = self.nuke_bg.checkedButton().text()
         description = self.desc_edit.toPlainText().strip()
         tagline = self.tagline_le.text().strip() 
-                
-        description = self.desc_edit.toPlainText()
-        tagline = self.tagline_le.text()
         
         repo_link = self.repo_link.text()
         issues_link = self.issues_link.text()
@@ -527,9 +530,10 @@ class NodeVault_GUI(QWidget):
         
         data = {
             "uuid": submission_id,
-            "submiited": submitted_time,
+            "submitted": submitted_time,
             "filetype": filetype,
             "filename": filename,
+            "main_file": self.main_file,
             "author": author,
             "version": version,
             "sub_category": sub_category,
@@ -548,7 +552,8 @@ class NodeVault_GUI(QWidget):
         
         # Make Folder for Json File & Write JSON in it
         os.makedirs(save_dir, exist_ok=True)
-        print(save_dir)
+
+        
         json_filename = os.path.join(save_dir, f"{submission_id}.json")
         try:
             with open(json_filename, "w") as file:
@@ -556,10 +561,15 @@ class NodeVault_GUI(QWidget):
                 QMessageBox.information(self, "Info", "The file has been submitted successfully.")
         except Exception as e:
             print(f"Error > {e}")
+            
+        file_extension = os.path.splitext(self.main_file)[1]
+        new_filename = f"{submission_id}{file_extension}" 
+        dst_path = os.path.join(save_dir, new_filename)
+        shutil.copy(src=self.main_file, dst=dst_path)
         
         for docs_file in data["extra_docs"]:
             docs_folder = os.path.join(save_dir, "Docs")
-            os.makedirs(image_folder, exist_ok=True)
+            os.makedirs(docs_folder, exist_ok=True)
             shutil.copy(src=docs_file, dst=docs_folder)
             
         for image_file in data["attached_images"]:
