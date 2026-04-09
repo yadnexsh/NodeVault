@@ -43,6 +43,17 @@ class NodeVault_GUI(QWidget):
         super().__init__()
         self.setWindowTitle("Node Vault")
         self.resize(1300, 600)
+        try:
+            os.makedirs(GIZMO_FOLDER, exist_ok= True)
+            print(f"Gizmo Folder created > {GIZMO_FOLDER}")
+            os.makedirs(TEMPLATE_FOLDER, exist_ok= True)
+            print(f"Template Folder created > {TEMPLATE_FOLDER}")
+            os.makedirs(SCRIPT_FOLDER, exist_ok= True)
+            print(f"Script Folder created > {SCRIPT_FOLDER}")
+        except Exception as e:
+            print(f"{e}")
+            
+            
         self.initUI()
         self.main_file = []
         self.attached_images = []
@@ -169,7 +180,7 @@ class NodeVault_GUI(QWidget):
         self.author_le = QLineEdit()
         self.version_le = QLineEdit()
         self.tagline_le = QLineEdit()
-        self.author_le.setPlaceholderText(USERNAME)
+        self.author_le.setText(USERNAME)
         self.author_le.setReadOnly(True)
         left_form.addRow("File Name:", self.filename_le)
         left_form.addRow("Version:", self.version_le)
@@ -458,7 +469,7 @@ class NodeVault_GUI(QWidget):
             "All Files (*);;Python Files (*.py);;Nuke Files (*.nk)"
         )
         if file_path:
-            self.main_file = [file_path]
+            self.main_file = file_path
             self.file_label.setText(os.path.basename(file_path))      
             
     # ------- Label Update : Extra Docs  -----------
@@ -471,37 +482,43 @@ class NodeVault_GUI(QWidget):
         
     def save_json(self):
         
-        # -------- VALIDATE INPUTS ------------
+        # -------- ERROR LIST + VALIDATE INPUTS ------------
+        errors = []
+        
         if not self.main_file:
-            QMessageBox.warning(self, "Missing Field", "Please select a Main File.")
-            return
+            e = "Please select a Main File."
+            errors.append(e)
         
         if not self.filetype_bg.checkedButton():
-            QMessageBox.warning(self, "Missing Field", "Please select a File Type.")
-            return
+            e = "Please select a File Type"
+            errors.append(e)
 
-        if not self.subcategory_bg.checkedButton():
-            QMessageBox.warning(self, "Missing Field", "Please select a Sub Category.")
-            return
+        if not self.subcategory_bg.checkedButton():            
+            e = "Please select Sub Category"
+            errors.append(e)
 
-        if not self.render_bg.checkedButton():
-            QMessageBox.warning(self, "Missing Field", "Please select a Render Type.")
-            return
+        if not self.render_bg.checkedButton():            
+            e = "Please select a Render Type."
+            errors.append(e)
 
-        if not self.nuke_bg.checkedButton():
-            QMessageBox.warning(self, "Missing Field", "Please select a Nuke Version.")
-            return
+        if not self.nuke_bg.checkedButton():            
+            e = "Please select a Nuke Version."
+            errors.append(e)
 
-        if not self.filename_le.text().strip():
-            QMessageBox.warning(self, "Missing Field", "Please enter a File Name.")
-            return
-
-        if not self.author_le.text().strip():
-            QMessageBox.warning(self, "Missing Field", "Please enter an Author name.")
+        if not self.filename_le.text().strip():            
+            e = "Please enter a File Name."
+            errors.append(e)
+            
+        # - -- ERROR MSG ----
+        if len(errors) != 0:
+            error_string = "\n".join(f"• {err}" for err in errors)
+        
+            QMessageBox.critical(self, "Validation Errors", 
+                            f"Please fix the following:\n\n{error_string}")
             return
         
-        submission_id = str(uuid.uuid4())
 
+        submission_id = str(uuid.uuid4())
         
         filetype = self.filetype_bg.checkedButton().text()
         folder_map = {
@@ -533,7 +550,7 @@ class NodeVault_GUI(QWidget):
             "submitted": submitted_time,
             "filetype": filetype,
             "filename": filename,
-            "main_file": self.main_file,
+            # "main_file": self.main_file,
             "author": author,
             "version": version,
             "sub_category": sub_category,
@@ -552,35 +569,37 @@ class NodeVault_GUI(QWidget):
         
         # Make Folder for Json File & Write JSON in it
         os.makedirs(save_dir, exist_ok=True)
-
-        
         json_filename = os.path.join(save_dir, f"{submission_id}.json")
         try:
             with open(json_filename, "w") as file:
                 json.dump(data, file, indent=4)
-                QMessageBox.information(self, "Info", "The file has been submitted successfully.")
+                
+            file_extension = os.path.splitext(self.main_file)[1]
+            new_filename = f"{submission_id}{file_extension}" 
+            dst_path = os.path.join(save_dir, new_filename)
+            shutil.copy(src=self.main_file, dst=dst_path)
+            
+            for docs_file in data["extra_docs"]:
+                docs_folder = os.path.join(save_dir, "Docs")
+                os.makedirs(docs_folder, exist_ok=True)
+                shutil.copy(src=docs_file, dst=docs_folder)
+            
+            for image_file in data["attached_images"]:
+                image_folder = os.path.join(save_dir, "Images")
+                os.makedirs(image_folder, exist_ok=True)
+                shutil.copy(src=image_file, dst=image_folder)
+                
+            for video_file in data["attached_video"]:
+                video_folder = os.path.join(save_dir, "Videos")
+                os.makedirs(video_folder, exist_ok=True)
+                shutil.copy(src=video_file, dst=video_folder)
+            QMessageBox.information(self, "Info", "The file has been submitted successfully.")
         except Exception as e:
             print(f"Error > {e}")
             
-        file_extension = os.path.splitext(self.main_file)[1]
-        new_filename = f"{submission_id}{file_extension}" 
-        dst_path = os.path.join(save_dir, new_filename)
-        shutil.copy(src=self.main_file, dst=dst_path)
+
         
-        for docs_file in data["extra_docs"]:
-            docs_folder = os.path.join(save_dir, "Docs")
-            os.makedirs(docs_folder, exist_ok=True)
-            shutil.copy(src=docs_file, dst=docs_folder)
-            
-        for image_file in data["attached_images"]:
-            image_folder = os.path.join(save_dir, "Images")
-            os.makedirs(image_folder, exist_ok=True)
-            shutil.copy(src=image_file, dst=image_folder)
-            
-        for video_file in data["attached_video"]:
-            video_folder = os.path.join(save_dir, "Videos")
-            os.makedirs(video_folder, exist_ok=True)
-            shutil.copy(src=video_file, dst=video_folder)
+
             
 
         
