@@ -414,8 +414,8 @@ class NodeVault_GUI(QWidget):
 
 
 
-#------
-    # ***************** COMMON FUNC *******************
+
+    # ***************** FUNC *******************
 
     def on_img_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
@@ -454,26 +454,32 @@ class NodeVault_GUI(QWidget):
     # *********** UPDATE GUI > LABEL / STATUS  ******************
     
     # ------- Label Update : IMAGE & VIDEO BOX -----------
+    @Slot()
     def on_preview_btn_1_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_1)
-
         
+    @Slot()
     def on_preview_btn_2_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_2)
-
+        
+    @Slot()
     def on_preview_btn_3_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_3)
         
+    @Slot()
     def on_preview_btn_4_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_4)
         
+    @Slot()
     def on_preview_btn_5_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_5)
-    
+        
+    @Slot()
     def on_demo_video_btn_clicked(self):
         self.on_video_btn_clicked(self.demo_video_btn)
 
     # ------- Label Update : Main File -----------
+    @Slot()
     def on_file_browse_clicked(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self, 
@@ -487,12 +493,15 @@ class NodeVault_GUI(QWidget):
             
     # ------- Label Update : Extra Docs  -----------
     
+    @Slot()
     def on_extra1_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra1_lbl)
         
+    @Slot()
     def on_extra2_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra2_lbl)
         
+    @Slot() 
     def save_json(self):
         
         # -------- ERROR LIST + VALIDATE INPUTS ------------
@@ -524,10 +533,9 @@ class NodeVault_GUI(QWidget):
             
         # - -- ERROR MSG ----
         if len(errors) != 0:
-            error_string = "\n".join(f"• {err}" for err in errors)
+            error_string = "\n".join(f"- {each}" for each in errors)
         
-            QMessageBox.critical(self, "Validation Errors", 
-                            f"Please fix the following:\n\n{error_string}")
+            QMessageBox.critical(self, "Validation Errors", f"Please fix the following:\n{error_string}")
             return
         
 
@@ -563,7 +571,6 @@ class NodeVault_GUI(QWidget):
             "submitted": submitted_time,
             "filetype": filetype,
             "filename": filename,
-            # "main_file": self.main_file,
             "author": author,
             "version": version,
             "sub_category": sub_category,
