@@ -19,34 +19,55 @@ from PySide6.QtWidgets import (
     QButtonGroup,
     QMessageBox
 )
-from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem, QIcon
+from PySide6.QtCore import Qt, Slot, QSize
 import sys
 import os
 import json
 import datetime
 import uuid
+import shutil
 
-ROOT_FOLDER = r"H:\Gamut\Projects\node_vault\output"
-GIZMO_FOLDER = os.path.join(ROOT_FOLDER,"Gizmos")
-TEMPLATE_FOLDER = os.path.join(ROOT_FOLDER,"Template")
-SCRIPT_FOLDER = os.path.join(ROOT_FOLDER,"Scripts")
+ROOT_FOLDER = r"H:\Gamut\Projects\node_vault"
 
+MEDIA_FOLDER = os.path.join(ROOT_FOLDER, "media")
+ICON_FOLDER = os.path.join(MEDIA_FOLDER, "icons")
 
-THUMBNAIL_FILE = r"H:\Gamut\Projects\node_vault\media\heavily_compressed.png"
+OUTPUT_FOLDER = os.path.join(ROOT_FOLDER, "output")
+GIZMO_FOLDER = os.path.join(OUTPUT_FOLDER,"Gizmos")
+TEMPLATE_FOLDER = os.path.join(OUTPUT_FOLDER,"Template")
+SCRIPT_FOLDER = os.path.join(OUTPUT_FOLDER,"Scripts")
+
+USERNAME = os.getlogin()
+
+THUMBNAIL_FILE = os.path.join(MEDIA_FOLDER, "heavily_compressed.png")
+IMAGE_ICON_PATH = os.path.join(ICON_FOLDER, "image_icon.png")
+VIDEO_ICON_PATH = os.path.join(ICON_FOLDER, "video_icon.png")
+
 FIXED_POLICY = QSizePolicy.Policy.Fixed
 
 
 class NodeVault_GUI(QWidget):
+    
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Node Vault")
         self.resize(1300, 600)
+        try:
+            os.makedirs(GIZMO_FOLDER, exist_ok= True)
+            print(f"Gizmo Folder created > {GIZMO_FOLDER}")
+            os.makedirs(TEMPLATE_FOLDER, exist_ok= True)
+            print(f"Template Folder created > {TEMPLATE_FOLDER}")
+            os.makedirs(SCRIPT_FOLDER, exist_ok= True)
+            print(f"Script Folder created > {SCRIPT_FOLDER}")
+        except Exception as e:
+            print(f"{e}")
+            
         self.initUI()
-        self.main_file = {}
-        self.attached_images = {}
-        self.attached_video = {}
-        self.extra_docs = {}
+        self.main_file = []
+        self.attached_images = []
+        self.attached_video = []
+        self.extra_docs = []
         
     def initUI(self):
 
@@ -168,7 +189,8 @@ class NodeVault_GUI(QWidget):
         self.author_le = QLineEdit()
         self.version_le = QLineEdit()
         self.tagline_le = QLineEdit()
-
+        self.author_le.setText(USERNAME)
+        self.author_le.setReadOnly(True)
         left_form.addRow("File Name:", self.filename_le)
         left_form.addRow("Version:", self.version_le)
         right_form.addRow("Author:", self.author_le)
@@ -306,16 +328,25 @@ class NodeVault_GUI(QWidget):
 
         # -------- Preview Images + Demo Video -----------
         self.media_box = QGroupBox("Preview Images & Demo Video")
-        self.media_box_layout = QGridLayout(self.media_box)
+        self.media_box_layout = QHBoxLayout(self.media_box)
+        self.image_icon = QIcon(IMAGE_ICON_PATH)
+        self.video_icon = QIcon(VIDEO_ICON_PATH)
 
-        self.preview_btn_1 = QPushButton("Img 1")
-        self.preview_btn_2 = QPushButton("Img 2")
-        self.preview_btn_3 = QPushButton("Img 3")
-        self.preview_btn_4 = QPushButton("Img 4")
-        self.preview_btn_5 = QPushButton("Img 5")
-        self.demo_video_btn = QPushButton("Demo Video")
-
-        square_size = 65
+        self.preview_btn_1 = QPushButton()
+        self.preview_btn_2 = QPushButton()
+        self.preview_btn_3 = QPushButton()
+        self.preview_btn_4 = QPushButton()
+        self.preview_btn_5 = QPushButton()
+        self.demo_video_btn = QPushButton()
+        add_image_buttons = [self.preview_btn_1,self.preview_btn_2,self.preview_btn_3,self.preview_btn_4,self.preview_btn_5]
+        for each_image_btn in add_image_buttons:
+            each_image_btn.setIcon(self.image_icon)
+            each_image_btn.setIconSize(QSize(50, 50))
+            
+        self.demo_video_btn.setIcon(self.video_icon)
+        self.demo_video_btn.setIconSize(QSize(50, 50))
+        
+        square_size = 100
         
         self.preview_btn_1.setFixedSize(square_size, square_size)
         self.preview_btn_2.setFixedSize(square_size, square_size)
@@ -333,12 +364,9 @@ class NodeVault_GUI(QWidget):
         self.preview_btn_5.clicked.connect(self.on_preview_btn_5_clicked)
         self.demo_video_btn.clicked.connect(self.on_demo_video_btn_clicked)
 
-        self.media_box_layout.addWidget(self.preview_btn_1, 0, 0)
-        self.media_box_layout.addWidget(self.preview_btn_2, 0, 1)
-        self.media_box_layout.addWidget(self.preview_btn_3, 0, 2)
-        self.media_box_layout.addWidget(self.preview_btn_4, 1, 0)
-        self.media_box_layout.addWidget(self.preview_btn_5, 1, 1)
-        self.media_box_layout.addWidget(self.demo_video_btn, 1, 2)
+        for each in add_image_buttons:
+            self.media_box_layout.addWidget(each)
+        self.media_box_layout.addWidget(self.demo_video_btn)
 
 
         #---
@@ -383,13 +411,7 @@ class NodeVault_GUI(QWidget):
         
         self.submit_master_layout.addWidget(self.btn_submit, alignment = Qt.AlignCenter)
         self.submit_master_layout.addStretch()
-# TEMP
-    def temp_subscribe_ui(self):
-        subscribe_tab = QWidget()
-        subscribe_tab_layout = QHBoxLayout(subscribe_tab)
-        self.btn_subscribe = QPushButton("Subs")
-        subscribe_tab_layout.addWidget(self.btn_subscribe)
-        self.primary_tabs.addTab(subscribe_tab, "Sub")
+
 
 
 #------
@@ -402,8 +424,12 @@ class NodeVault_GUI(QWidget):
         )
         if path:
             filename = os.path.basename(path)
-            button.setText(filename)
-            self.attached_images[filename] = path
+            print(path)
+            thumbnail = QIcon(path)
+            button.setIcon(thumbnail)
+            button.setIconSize(QSize(100, 100))
+            # button.setText(filename)
+            self.attached_images.append(path)
 
     def on_video_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
@@ -413,7 +439,7 @@ class NodeVault_GUI(QWidget):
         if path:
             filename = os.path.basename(path)
             button.setText(filename)
-            self.attached_video[filename] = path
+            self.attached_video.append(path)
 
     def on_doc_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
@@ -423,7 +449,7 @@ class NodeVault_GUI(QWidget):
         if path:
             filename = os.path.basename(path)
             button.setText(filename)
-            self.extra_docs[filename] = path
+            self.extra_docs.append(path)
             
     # *********** UPDATE GUI > LABEL / STATUS  ******************
     
@@ -449,13 +475,15 @@ class NodeVault_GUI(QWidget):
 
     # ------- Label Update : Main File -----------
     def on_file_browse_clicked(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Main File", "",
-            "Nuke files (*.gizmo *.py *.nk);;All files (*)"
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, 
+            "Select Main File", 
+            "", 
+            "All Files (*);;Python Files (*.py);;Nuke Files (*.nk)"
         )
-        if path:
-            filename = os.path.basename(path)
-            self.file_label.setText(filename)
+        if file_path:
+            self.main_file = file_path
+            self.file_label.setText(os.path.basename(file_path))      
             
     # ------- Label Update : Extra Docs  -----------
     
@@ -466,44 +494,64 @@ class NodeVault_GUI(QWidget):
         self.on_doc_btn_clicked(self.extra2_lbl)
         
     def save_json(self):
+        
+        # -------- ERROR LIST + VALIDATE INPUTS ------------
+        errors = []
+        
+        if not self.main_file:
+            e = "Please select a Main File."
+            errors.append(e)
+        
+        if not self.filetype_bg.checkedButton():
+            e = "Please select a File Type"
+            errors.append(e)
+
+        if not self.subcategory_bg.checkedButton():            
+            e = "Please select Sub Category"
+            errors.append(e)
+
+        if not self.render_bg.checkedButton():            
+            e = "Please select a Render Type."
+            errors.append(e)
+
+        if not self.nuke_bg.checkedButton():            
+            e = "Please select a Nuke Version."
+            errors.append(e)
+
+        if not self.filename_le.text().strip():            
+            e = "Please enter a File Name."
+            errors.append(e)
+            
+        # - -- ERROR MSG ----
+        if len(errors) != 0:
+            error_string = "\n".join(f"• {err}" for err in errors)
+        
+            QMessageBox.critical(self, "Validation Errors", 
+                            f"Please fix the following:\n\n{error_string}")
+            return
+        
+
         submission_id = str(uuid.uuid4())
-        submiited_time = datetime.datetime.now().isoformat(timespec='seconds')
-        filetype = "Unknown"
-        if self.filetype_bg.checkedButton():
-            filetype = self.filetype_bg.checkedButton().text()
-            if filetype == "Gizmo":
-                save_dir = os.path.join(GIZMO_FOLDER, submission_id)
-            if filetype == "Script":
-                save_dir = os.path.join(SCRIPT_FOLDER, submission_id)
-            if filetype == "Template":
-                save_dir = os.path.join(TEMPLATE_FOLDER, submission_id)
-        else:
-            QMessageBox.information(self, "Info", "Select the filetype")
-            
-        filename = self.filename_le.text()
+        
+        filetype = self.filetype_bg.checkedButton().text()
+        folder_map = {
+            "Gizmo" : GIZMO_FOLDER,
+            "Script" : SCRIPT_FOLDER,
+            "Template" : TEMPLATE_FOLDER
+        }
+        
+        save_dir = os.path.join(folder_map[filetype], submission_id)
+        
+        submitted_time = datetime.datetime.now().isoformat(timespec='seconds')
+
+        filename = self.filename_le.text().strip()
         author = self.author_le.text()
-        version = self.version_le.text() or "v001"
-
-        sub_category = "Unknown"
-        if self.subcategory_bg.checkedButton():
-            sub_category = self.subcategory_bg.checkedButton().text()
-        else:
-            QMessageBox.information(self, "Info", "Select the Sub Category")    
-            
-        render_type = "Unknown"
-        if self.render_bg.checkedButton():
-            render_type = self.render_bg.checkedButton().text()
-        else:
-            QMessageBox.information(self, "Info", "Select the Render Type")
-
-        nuke_version = "Unknown"
-        if self.nuke_bg.checkedButton():
-            nuke_version = self.nuke_bg.checkedButton().text()
-        else:
-            QMessageBox.information(self, "Info", "Select the Nuke Version")   
-            
-        description = self.desc_edit.toPlainText()
-        tagline = self.tagline_le.text()
+        version = self.version_le.text().strip() or "v001"
+        sub_category = self.subcategory_bg.checkedButton().text()
+        render_type = self.render_bg.checkedButton().text()
+        nuke_version = self.nuke_bg.checkedButton().text()
+        description = self.desc_edit.toPlainText().strip()
+        tagline = self.tagline_le.text().strip() 
         
         repo_link = self.repo_link.text()
         issues_link = self.issues_link.text()
@@ -512,9 +560,10 @@ class NodeVault_GUI(QWidget):
         
         data = {
             "uuid": submission_id,
-            "submiited": submiited_time,
+            "submitted": submitted_time,
             "filetype": filetype,
             "filename": filename,
+            # "main_file": self.main_file,
             "author": author,
             "version": version,
             "sub_category": sub_category,
@@ -533,12 +582,31 @@ class NodeVault_GUI(QWidget):
         
         # Make Folder for Json File & Write JSON in it
         os.makedirs(save_dir, exist_ok=True)
-        print(save_dir)
         json_filename = os.path.join(save_dir, f"{submission_id}.json")
         try:
             with open(json_filename, "w") as file:
                 json.dump(data, file, indent=4)
-                QMessageBox.information(self, "Info", "The file has been submitted successfully.")
+                
+            file_extension = os.path.splitext(self.main_file)[1]
+            new_filename = f"{submission_id}{file_extension}" 
+            dst_path = os.path.join(save_dir, new_filename)
+            shutil.copy(src=self.main_file, dst=dst_path)
+            
+            for docs_file in data["extra_docs"]:
+                docs_folder = os.path.join(save_dir, "Docs")
+                os.makedirs(docs_folder, exist_ok=True)
+                shutil.copy(src=docs_file, dst=docs_folder)
+            
+            for image_file in data["attached_images"]:
+                image_folder = os.path.join(save_dir, "Images")
+                os.makedirs(image_folder, exist_ok=True)
+                shutil.copy(src=image_file, dst=image_folder)
+                
+            for video_file in data["attached_video"]:
+                video_folder = os.path.join(save_dir, "Videos")
+                os.makedirs(video_folder, exist_ok=True)
+                shutil.copy(src=video_file, dst=video_folder)
+            QMessageBox.information(self, "Info", "The file has been submitted successfully.")
         except Exception as e:
             print(f"Error > {e}")
         
