@@ -25,4 +25,19 @@ Start adding edge cases - Pending Lil
 7 - libaray view
 - nuke load
 
+
 15 Apr
+
+1 change dicts to list in json file - Done
+2 combine pop messges in 1 -  Done
+3 git workflow branches - avoid -Done
+4 fix gizmo folder creation in other branch - Done
+5 create inital folders at the start of UI - Done
+6 Remove thumbnails and push it to form layout - Done
+
+
+Clear UI after submitting the file and send user to lib view
+Disable the filetype categories which we arent using right now.
+Add this gui in Nuke.
+Add way to import gizmo in nuke.
+Yes - No answer
