@@ -28,7 +28,7 @@ import datetime
 import uuid
 import shutil
 
-ROOT_FOLDER = r"G:\Yadnyesh\node_vault"
+ROOT_FOLDER = r"H:\Gamut\Projects\node_vault"
 
 MEDIA_FOLDER = os.path.join(ROOT_FOLDER, "media")
 ICON_FOLDER = os.path.join(MEDIA_FOLDER, "icons")
@@ -45,7 +45,7 @@ IMAGE_ICON_PATH = os.path.join(ICON_FOLDER, "image_icon.png")
 VIDEO_ICON_PATH = os.path.join(ICON_FOLDER, "video_icon.png")
 
 FIXED_POLICY = QSizePolicy.Policy.Fixed
-FILETYPE_FOLDERS = ["Gizmos"]
+FILETYPE_FOLDERS = ["Gizmos", "Scripts", "Template"]
 
 
 class NodeVault_GUI(QWidget):
@@ -129,7 +129,8 @@ class NodeVault_GUI(QWidget):
         model.appendRow(self.misc_item)
 
         self.category_panel.setModel(model)
-        self.category_panel.doubleClicked.connect(self.on_category_panel_clicked)
+        self.category_panel.clicked.connect(self.on_tree_click)
+
         # -------------- ACTIVE FILTER BAR --------------
         self.tabs = QTabWidget()
 
@@ -141,19 +142,17 @@ class NodeVault_GUI(QWidget):
 
         # -------------- GIZMO GRID (inside All filter) --------------
         self.files_grid_layout = QGridLayout()
+
+        MAX_ROWS = 4
+        MAX_COLS = 4
+
+        for row in range(MAX_ROWS):
+            for col in range(MAX_COLS):
+                thumb = QLabel()
+                thumb.setPixmap(QPixmap(THUMBNAIL_FILE))
+                self.files_grid_layout.addWidget(thumb, row, col)
+
         self.all_tab.setLayout(self.files_grid_layout)
-        # self.files_grid_layout = QGridLayout()
-
-        # MAX_ROWS = 4
-        # MAX_COLS = 4
-
-        # for row in range(MAX_ROWS):
-        #     for col in range(MAX_COLS):
-        #         thumb = QPushButton("Text")
-        #         # thumb.setPixmap(QPixmap(THUMBNAIL_FILE))
-        #         self.files_grid_layout.addWidget(thumb, row, col)
-
-        # self.all_tab.setLayout(self.files_grid_layout)
 
         # -------------- CONTENT AREA LAYOUT  --------------
         self.right_panel_layout = QVBoxLayout()
@@ -163,13 +162,7 @@ class NodeVault_GUI(QWidget):
         self.library_master_layout.addWidget(self.category_panel)
         self.library_master_layout.addLayout(self.right_panel_layout)
 
-    def populate_lib_view(self):
-        folder_name = os.listdir(GIZMO_FOLDER)
-        for each in folder_name:
-            filename = f"{each}.json"
-            each_folder = os.path.join(GIZMO_FOLDER, each)
-            each_json = os.path.join(each_folder, filename)
-        
+
     def init_submit_ui(self):
 
         # -------------- MASTER SUBMIT LAYOUT --------------
@@ -218,11 +211,11 @@ class NodeVault_GUI(QWidget):
         self.filetype_bg.setExclusive(True)
         
         self.gizmo_btn = QPushButton("Gizmo")
-        # self.script_btn = QPushButton("Script")
-        # self.template_btn = QPushButton("Template")
+        self.script_btn = QPushButton("Script")
+        self.template_btn = QPushButton("Template")
         
         # Making The buttons Clickable
-        for btn in [self.gizmo_btn]:
+        for btn in [self.gizmo_btn, self.script_btn, self.template_btn]:
             btn.setCheckable(True)
             self.filetype_bg.addButton(btn)
             self.filetype_box_layout.addWidget(btn)
@@ -432,7 +425,7 @@ class NodeVault_GUI(QWidget):
     def on_img_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Preview Image", "",
-            "Images (*.png *.jpg *.jpeg)"
+            "Images (*.png *.jpg *.jpeg);;All files (*)"
         )
         if path:
             filename = os.path.basename(path)
@@ -446,7 +439,7 @@ class NodeVault_GUI(QWidget):
     def on_video_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Demo Video", "",
-            "Video (*.mp4 *.mov *.avi)"
+            "Video (*.mp4 *.mov *.avi);;All files (*)"
         )
         if path:
             filename = os.path.basename(path)
@@ -456,7 +449,7 @@ class NodeVault_GUI(QWidget):
     def on_doc_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Extra Document", "",
-            "PDF (*.pdf);;Doc File (*.doc)"
+            "PDF (*.pdf);;All files (*)"
         )
         if path:
             filename = os.path.basename(path)
@@ -497,7 +490,7 @@ class NodeVault_GUI(QWidget):
             self, 
             "Select Main File", 
             "", 
-            "Python Files (*.py);;Nuke Files (*.nk);;gizmo Files (*.gizmo)"
+            "All Files (*);;Python Files (*.py);;Nuke Files (*.nk)"
         )
         if file_path:
             self.main_file = file_path
@@ -512,7 +505,14 @@ class NodeVault_GUI(QWidget):
     @Slot()
     def on_extra2_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra2_lbl)
+
+    def on_tree_click(self, index):
+        clicked_text = index.data(Qt.DisplayRole)
+        if clicked_text == "Gizmos":
+            print("Show the Gizmo buttons on the right side!")
         
+
+
     @Slot() 
     def save_json(self):
         
@@ -556,8 +556,8 @@ class NodeVault_GUI(QWidget):
         filetype = self.filetype_bg.checkedButton().text()
         folder_map = {
             "Gizmo" : GIZMO_FOLDER,
-            # "Script" : SCRIPT_FOLDER,
-            # "Template" : TEMPLATE_FOLDER
+            "Script" : SCRIPT_FOLDER,
+            "Template" : TEMPLATE_FOLDER
         }
         
         save_dir = os.path.join(folder_map[filetype], submission_id)
@@ -566,15 +566,7 @@ class NodeVault_GUI(QWidget):
 
         filename = self.filename_le.text().strip()
         author = self.author_le.text()
-        try:
-            version = int(self.version_le.text().strip())
-        except ValueError:
-            QMessageBox.critical(self, "Error", "Invalid input! Please enter integers only.")
-            self.version_le.clear()
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"{e}")
-
-
+        version = self.version_le.text().strip() or "v001"
         sub_category = self.subcategory_bg.checkedButton().text()
         render_type = self.render_bg.checkedButton().text()
         nuke_version = self.nuke_bg.checkedButton().text()
@@ -637,20 +629,19 @@ class NodeVault_GUI(QWidget):
         except Exception as e:
             print(f"Error > {e}")
     
+    
+    
+    
     @Slot() 
-    def read_json(self):
+    def read_json():
         folder_name = os.listdir(GIZMO_FOLDER)
         for each in folder_name:
             filename = f"{each}.json"
             each_folder = os.path.join(GIZMO_FOLDER, each)
             each_json = os.path.join(each_folder, filename)
             print(each_json)
-    
-    def on_category_panel_clicked(self, index):
-        clicked_tab = index.data(Qt.DisplayRole)
-    #     for each in reversed(range(self.category_panel.model().rowCount())):
-    #         
-                
+
+
         
     def on_submit_clicked(self):
         self.save_json()
