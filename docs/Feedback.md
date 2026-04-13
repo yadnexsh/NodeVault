@@ -15,8 +15,7 @@
 
 2
 
-1 What Why How - To explain technical thing.
-2 Where + When - To explain technical thing.
+
 
 Submit window should give popup to user for what happened when user clicked submit btn. - Done
 Complete JSON + uuid img video - Done Creates json now in required folders
@@ -25,4 +24,25 @@ Start adding edge cases - Pending Lil
 7 - libaray view
 - nuke load
 
+
 15 Apr
+
+1 change dicts to list in json file - Done
+2 combine pop messges in 1 -  Done
+3 git workflow branches - avoid -Done
+4 fix gizmo folder creation in other branch - Done
+5 create inital folders at the start of UI - Done
+6 Remove thumbnails and push it to form layout - Done
+
+
+Clear UI after submitting the file and send user to lib view - Done
+Disable the filetype categories which we arent using right now. - Done
+Add this gui in Nuke. - WIP
+Add way to import gizmo in nuke.
+
+
+Comms :
+Yes - No answer
+What, Why ,How, Where + When - To explain technical thing.
+Remove unwanted things from UI
+Doc the logs

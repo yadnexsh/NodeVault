@@ -1,0 +1,22 @@
+{
+    "uuid": "a248eb2f-3742-45ea-9778-93a66784136d",
+    "submitted": "2026-04-13T18:21:38",
+    "filetype": "Gizmo",
+    "filename": "Abc",
+    "author": "Yadnyesh",
+    "version": 0,
+    "sub_category": "Draw",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "Abc",
+    "tagline": "Abc",
+    "extra_docs": [],
+    "repo_link": "Abc",
+    "issues_link": "Abc",
+    "website": "Abc",
+    "extra_link": "Abc",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/media/compressed.png"
+    ],
+    "attached_video": []
+}

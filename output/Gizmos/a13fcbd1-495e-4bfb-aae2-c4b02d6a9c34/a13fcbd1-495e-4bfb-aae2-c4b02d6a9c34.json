@@ -1,0 +1,22 @@
+{
+    "uuid": "a13fcbd1-495e-4bfb-aae2-c4b02d6a9c34",
+    "submitted": "2026-04-13T15:30:24",
+    "filetype": "Gizmo",
+    "filename": "1",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Image",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "1",
+    "tagline": "1",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/test.doc"
+    ],
+    "repo_link": "",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [],
+    "attached_video": []
+}
