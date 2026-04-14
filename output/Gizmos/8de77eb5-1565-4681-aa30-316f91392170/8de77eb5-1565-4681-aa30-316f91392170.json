@@ -1,0 +1,24 @@
+{
+    "uuid": "8de77eb5-1565-4681-aa30-316f91392170",
+    "submitted": "2026-04-13T22:33:22",
+    "filetype": "Gizmo",
+    "filename": "Relight",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "Test",
+    "tagline": "Test",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/test.doc"
+    ],
+    "repo_link": "Test",
+    "issues_link": "Test",
+    "website": "Test",
+    "extra_link": "Test",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/media/compressed.png"
+    ],
+    "attached_video": []
+}

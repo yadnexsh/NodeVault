@@ -46,3 +46,6 @@ Yes - No answer
 What, Why ,How, Where + When - To explain technical thing.
 Remove unwanted things from UI
 Doc the logs
+
+
+deployment edge cases pending such as icon folder creation. Creating required folders at start.

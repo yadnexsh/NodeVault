@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import (
+from PySide2.QtWidgets import (
     QApplication,
     QWidget,
     QPushButton,
@@ -19,8 +19,8 @@ from PySide6.QtWidgets import (
     QButtonGroup,
     QMessageBox
 )
-from PySide6.QtGui import QPixmap, QStandardItemModel, QStandardItem, QIcon
-from PySide6.QtCore import Qt, Slot, QSize
+from PySide2.QtGui import QPixmap, QStandardItemModel, QStandardItem, QIcon
+from PySide2.QtCore import Qt, Slot, QSize
 import sys
 import os
 import json
@@ -95,6 +95,7 @@ class NodeVault_GUI(QWidget):
 
         self.init_library_ui()
         self.init_submit_ui()
+        self.init_detailed_ui()
         
 
 
@@ -171,7 +172,74 @@ class NodeVault_GUI(QWidget):
         
         
         
+    def init_detailed_ui(self):
+        self.detailed_tab = QWidget()
+        self.tabs.addTab(self.detailed_tab, "Detailed Tab")
+        
+        self.detailed_tab_layout = QHBoxLayout()
+        left_layout = QVBoxLayout()
+        lbox1 = QVBoxLayout()
+        lbox2 = QVBoxLayout()
+        
+        right_layout = QVBoxLayout()
+        rbox1 = QVBoxLayout()
+        rbox2 = QVBoxLayout()
+        
+        
+        filename = QLabel("Filename")
+        
+        filename_font = filename.font()
+        filename_font.setPointSize(14)
+        filename_font.setBold(True)
+        filename.setFont(filename_font)
+        
+        # test = QLabel(f"{filename} - {author}")
+        
+        author = QLabel("Author")
+        tagline = QLabel("Tagline")
+        node_info = QLabel("node_info")
+        node_info = QLabel("node_info")
+        submitted = QLabel("submitted")
+        resources = QLabel("resources")
+        repo = QLabel("repo")
+        issue = QLabel("issue")
+        docs = QLabel("docs")
+        desc = QLabel("desc")
+        
+        
+        
 
+        
+        sub = QPushButton("1")
+
+        
+        # left_layout.addWidget(test_btn1)
+        lbox1.addWidget(filename)
+        lbox1.addWidget(author)
+        lbox1.addWidget(tagline)
+        lbox2.addWidget(desc)
+        
+        rbox1.addWidget(node_info)
+        rbox1.addWidget(submitted)
+        rbox2.addWidget(resources)
+        rbox2.addWidget(repo)
+        rbox2.addWidget(issue)
+        rbox2.addWidget(docs)
+        
+        left_layout.addLayout(lbox1, 3)
+        left_layout.addLayout(lbox2, 7)
+        
+        right_layout.addLayout(rbox1)
+        right_layout.addLayout(rbox2)
+        
+        
+
+        
+        self.detailed_tab_layout.addLayout(left_layout, 7)          # 7 = 70% which is a stetch value in func.
+        self.detailed_tab_layout.addLayout(right_layout, 3)
+        self.detailed_tab.setLayout(self.detailed_tab_layout)
+        
+        
         
     def init_submit_ui(self):
 
@@ -429,6 +497,7 @@ class NodeVault_GUI(QWidget):
         self.submit_master_layout.addStretch()
 
 
+        
 
     
         
@@ -737,8 +806,14 @@ class NodeVault_GUI(QWidget):
     def on_submit_clicked(self):
         self.save_json()
 
+window =  None
+def launch():
+    global window
+    window = NodeVault_GUI()
+    window.show()
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = NodeVault_GUI()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
