@@ -28,16 +28,17 @@ import datetime
 import uuid
 import shutil
 
-ROOT_FOLDER = r"H:\Gamut\Projects\node_vault"
+CURRENT_FILEDIR = os.path.dirname(__file__)
+ROOT_FOLDER = os.path.dirname(CURRENT_FILEDIR)
 
 
-MEDIA_FOLDER = os.path.join(ROOT_FOLDER, "media")
+MEDIA_FOLDER = os.path.join(CURRENT_FILEDIR, "media")
 ICON_FOLDER = os.path.join(MEDIA_FOLDER, "icons")
 
 OUTPUT_FOLDER = os.path.join(ROOT_FOLDER, "output")
 GIZMO_FOLDER = os.path.join(OUTPUT_FOLDER,"Gizmos")
-TEMPLATE_FOLDER = os.path.join(OUTPUT_FOLDER,"Template")
-SCRIPT_FOLDER = os.path.join(OUTPUT_FOLDER,"Scripts")
+# TEMPLATE_FOLDER = os.path.join(OUTPUT_FOLDER,"Template")
+# SCRIPT_FOLDER = os.path.join(OUTPUT_FOLDER,"Scripts")
 
 USERNAME = os.getlogin()
 
@@ -177,13 +178,18 @@ class NodeVault_GUI(QWidget):
         self.tabs.addTab(self.detailed_tab, "Detailed Tab")
         
         self.detailed_tab_layout = QHBoxLayout()
+        
         left_layout = QVBoxLayout()
         lbox1 = QVBoxLayout()
+        
         lbox2 = QVBoxLayout()
+        
+        
         
         right_layout = QVBoxLayout()
         rbox1 = QVBoxLayout()
         rbox2 = QVBoxLayout()
+        
         
         
         filename = QLabel("Filename")

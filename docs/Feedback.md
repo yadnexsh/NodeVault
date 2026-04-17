@@ -49,3 +49,19 @@ Doc the logs
 
 
 deployment edge cases pending such as icon folder creation. Creating required folders at start.
+variables are confusing in between
+
+
+
+-- IMP
+demo video + with talk
+main branch
+clear all the code not refactor
+remove all hardcoded paths  
+- create samplee linkedin post - and msg to me, OK, POST...
+
+-- Connect
+- improvements next.
+
+
+

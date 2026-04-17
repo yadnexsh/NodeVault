@@ -1,0 +1,22 @@
+{
+    "uuid": "f2b86c9b-58cc-4477-8c99-ebbea77756ba",
+    "submitted": "2026-04-16T18:19:27",
+    "filetype": "Gizmo",
+    "filename": "ColorSmear",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "None",
+    "tagline": "None",
+    "extra_docs": [],
+    "repo_link": "repo",
+    "issues_link": "repo",
+    "website": "repo",
+    "extra_link": "repo",
+    "attached_images": [
+        "C:/Users/Yadnyesh/Pictures/1.png"
+    ],
+    "attached_video": []
+}

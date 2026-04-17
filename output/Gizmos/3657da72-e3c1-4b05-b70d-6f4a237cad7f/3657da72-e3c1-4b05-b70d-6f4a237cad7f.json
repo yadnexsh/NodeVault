@@ -1,0 +1,26 @@
+{
+    "uuid": "3657da72-e3c1-4b05-b70d-6f4a237cad7f",
+    "submitted": "2026-04-16T21:04:35",
+    "filetype": "Gizmo",
+    "filename": "NewNode",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "None",
+    "tagline": "None",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/temp/test.doc"
+    ],
+    "repo_link": "google.com",
+    "issues_link": "google.com",
+    "website": "google.com",
+    "extra_link": "google.com",
+    "attached_images": [
+        "C:/Users/Yadnyesh/Pictures/1.png"
+    ],
+    "attached_video": [
+        "H:/Gamut/Projects/node_vault/temp/test.mp4"
+    ]
+}
