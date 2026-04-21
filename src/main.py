@@ -4,7 +4,6 @@ from PySide2.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QLabel,
-    QComboBox,
     QTabWidget,
     QVBoxLayout,
     QHBoxLayout,
@@ -17,8 +16,7 @@ from PySide2.QtWidgets import (
     QFileDialog,
     QSpacerItem,
     QButtonGroup,
-    QMessageBox,
-    QFrame
+    QMessageBox
 )
 from PySide2.QtGui import QPixmap, QStandardItemModel, QStandardItem, QIcon, QDesktopServices
 from PySide2.QtCore import Qt, Slot, QSize, QUrl
@@ -29,6 +27,11 @@ import json
 import datetime
 import uuid
 import shutil
+
+# ============================================================
+#  PATH CONSTANTS
+# ============================================================
+# All folder paths resolved once at import time.
 
 CURRENT_FILEDIR = os.path.dirname(__file__)
 ROOT_FOLDER = os.path.dirname(CURRENT_FILEDIR)
@@ -42,27 +45,35 @@ ICON_FOLDER = os.path.join(MEDIA_FOLDER, "icons")
 NODEVAULT_STUDIO_FOLDER =  os.path.join(ROOT_FOLDER, "NodeVault_Studio")
 GIZMO_FOLDER = os.path.join(NODEVAULT_STUDIO_FOLDER,"Gizmos")
 
-
+# ============================================================
+#  MISC CONSTANTS
+# ============================================================
 
 USERNAME = os.getlogin()
-
 ICON_IMAGE_PATH = os.path.join(ICON_FOLDER, "ICON_image.png")
-
-
-ICON_VIDEO_PATH = os.path.join(ICON_FOLDER, "ICON_video.png")
-
 FIXED_POLICY = QSizePolicy.Policy.Fixed
 FILETYPE_FOLDERS = ["Gizmos"]
 
 print("--" * 40)
 
+# ============================================================
+#  MAIN WINDOW
+# ============================================================
+
 class NodeVault_GUI(QWidget):
     
     def __init__(self):
+        """
+        Set up the main window, ensure required studio folders exist,
+        and initialise attachment state lists.
+        """
         super().__init__()
         self.setWindowTitle("Node Vault")
         self.resize(1300, 600)
         
+        # ----------------------------------------------------------
+        #  FOLDER SETUP  –  create NodeVault_Studio + sub-folders
+        # ----------------------------------------------------------
         try:
             if os.path.exists(NODEVAULT_STUDIO_FOLDER):
                 print("NODEVAULT_STUDIO_FOLDER folder exists")
@@ -81,12 +92,21 @@ class NodeVault_GUI(QWidget):
             print(f"{e}")
             
         self.initUI()
+
+        # ----------------------------------------------------------
+        #  ATTACHMENT STATE  –  populated when the user browses files
+        # ----------------------------------------------------------
         self.main_file = []
         self.attached_images = []
-        self.attached_video = []
         self.extra_docs = []
         
+    # ============================================================
+
     def initUI(self):
+        """
+        Build the top-level layout and the two primary tabs
+        (Library and Submit).
+        """
 
         # -------------- MAIN LAYOUT --------------
         self.main_layout = QVBoxLayout(self)
@@ -106,12 +126,19 @@ class NodeVault_GUI(QWidget):
         # -------------- ASSEMBLE MAIN WINDOW --------------
         self.main_layout.addWidget(self.primary_tabs)
 
+    # ============================================================
+
     def init_library_ui(self):
+        """
+        Build the Library tab: left category tree + right closable
+        content tabs with a grid of gizmo buttons.
+        """
         
         # -------------- LIBRARY TAB LAYOUT --------------
         self.library_master_layout = QHBoxLayout(self.library_tab)
 
         # -------------- CATEGORY PANEL (Tree View) --------------
+        # Fixed-width tree showing Gizmo sub-categories.
         self.category_panel = QTreeView()
         self.category_panel.setFixedWidth(300)
         self.category_panel.setEditTriggers(QTreeView.NoEditTriggers) 
@@ -141,10 +168,10 @@ class NodeVault_GUI(QWidget):
         self.category_panel.clicked.connect(self.on_category_panel_clicked)
         
         # -------------- ACTIVE FILTER BAR --------------
+        # Closable tab widget that holds the library grid and detail tabs.
         self.tabs = QTabWidget()
 
         self.library_tab = QWidget()
-
 
         self.tabs.addTab(self.library_tab, "Library")
         self.tabs.setTabsClosable(True)
@@ -161,12 +188,19 @@ class NodeVault_GUI(QWidget):
         # -------------- ASSEMBLE LIBRARY TAB --------------
         self.library_master_layout.addWidget(self.category_panel)
         self.library_master_layout.addLayout(self.right_panel_layout)
+
+        # Select Gizmo root by default and populate the grid.
         default_index = self.gizmos_item.index()
         self.category_panel.setCurrentIndex(default_index)
         self.on_category_panel_clicked(default_index)
         
-        
+    # ============================================================
+
     def init_submit_ui(self):
+        """
+        Build the Submit tab: all input groups (info, file type, main
+        file, description, sub-category, render/nuke, docs, links, media).
+        """
 
         # -------------- MASTER SUBMIT LAYOUT --------------
         self.submit_master_layout = QVBoxLayout(self.submit_tab)
@@ -185,6 +219,7 @@ class NodeVault_GUI(QWidget):
         self.main_right_box = QVBoxLayout()
 
         # -------- Information Box ---------------
+        # Name, version, author, and tagline fields.
         self.information_box = QGroupBox("Basic Info")
         self.information_box_layout = QHBoxLayout(self.information_box)
 
@@ -206,6 +241,7 @@ class NodeVault_GUI(QWidget):
         self.information_box_layout.addLayout(right_form)
 
         # ------------- File Type Box -----------
+        # Exclusive button group – currently only Gizmo is supported.
         self.filetype_box = QGroupBox("File Types")
         self.filetype_box_layout = QHBoxLayout(self.filetype_box) 
         
@@ -222,6 +258,7 @@ class NodeVault_GUI(QWidget):
             self.filetype_box_layout.addWidget(btn)
 
         # ------------- Main File Box -----------
+        # Browse and display the selected .gizmo file path.
         file_group = QGroupBox("Main File")
         file_layout = QVBoxLayout(file_group)
         self.file_label = QLabel("No file selected")
@@ -238,6 +275,7 @@ class NodeVault_GUI(QWidget):
         desc_layout.addWidget(self.desc_edit)
 
         # --- Sub-Category Options  ---
+        # Exclusive toggle buttons mapping to the tree categories.
         self.sub_category_box = QGroupBox("Sub Category")
         self.sub_category_layout = QHBoxLayout(self.sub_category_box)
 
@@ -256,6 +294,7 @@ class NodeVault_GUI(QWidget):
             self.sub_category_layout.addWidget(btn)
             
         # --- Render + Nuke Version  ---
+        # Two independent exclusive groups placed side by side.
         self.render_nuke_layout = QHBoxLayout()
 
         self.render_box = QGroupBox("Render")
@@ -287,9 +326,9 @@ class NodeVault_GUI(QWidget):
         self.render_nuke_layout.addWidget(self.nuke_box)
 
         # -------- Docs Box ---------
+        # Up to two optional supplementary documents (PDF / DOC).
         self.docs_box = QGroupBox("Docs")
         self.docs_box_layout = QVBoxLayout(self.docs_box)
-
 
         self.extra1_row_layout = QHBoxLayout()
         self.extra1_lbl = QLabel("No file selected")
@@ -311,6 +350,7 @@ class NodeVault_GUI(QWidget):
         self.docs_box_layout.addLayout(self.extra2_row_layout)
 
         # -------- External Links Box -------
+        # Optional repo, issues, website, and extra URL fields.
         self.external_box = QGroupBox("External Links")
         self.external_box_layout = QHBoxLayout(self.external_box)
 
@@ -331,25 +371,22 @@ class NodeVault_GUI(QWidget):
         self.external_box_layout.addLayout(right_link_form)
 
         # -------- Preview Images + Demo Video -----------
+        # Five fixed-size image buttons; icons update when images are picked.
         self.media_box = QGroupBox("Preview Images & Demo Video")
         self.media_box_layout = QHBoxLayout(self.media_box)
         self.image_icon = QIcon(ICON_IMAGE_PATH)
-        # self.video_icon = QIcon(ICON_VIDEO_PATH)
 
         self.preview_btn_1 = QPushButton()
         self.preview_btn_2 = QPushButton()
         self.preview_btn_3 = QPushButton()
         self.preview_btn_4 = QPushButton()
         self.preview_btn_5 = QPushButton()
-        # self.demo_video_btn = QPushButton()
+
         self.IMAGE_BUTTONS = [self.preview_btn_1,self.preview_btn_2,self.preview_btn_3,self.preview_btn_4,self.preview_btn_5]
         for each_image_btn in self.IMAGE_BUTTONS:
             each_image_btn.setIcon(self.image_icon)
             each_image_btn.setIconSize(QSize(50, 50))
-            
-        # self.demo_video_btn.setIcon(self.video_icon)
-        # self.demo_video_btn.setIconSize(QSize(50, 50))
-        
+
         square_size = 100
         
         self.preview_btn_1.setFixedSize(square_size, square_size)
@@ -357,20 +394,19 @@ class NodeVault_GUI(QWidget):
         self.preview_btn_3.setFixedSize(square_size, square_size)
         self.preview_btn_4.setFixedSize(square_size, square_size)
         self.preview_btn_5.setFixedSize(square_size, square_size)
-        # self.demo_video_btn.setFixedSize(square_size, square_size)
-        
-        # ---------------------------
 
         self.preview_btn_1.clicked.connect(self.on_preview_btn_1_clicked)
         self.preview_btn_2.clicked.connect(self.on_preview_btn_2_clicked)
         self.preview_btn_3.clicked.connect(self.on_preview_btn_3_clicked)
         self.preview_btn_4.clicked.connect(self.on_preview_btn_4_clicked)
         self.preview_btn_5.clicked.connect(self.on_preview_btn_5_clicked)
-        # self.demo_video_btn.clicked.connect(self.on_demo_video_btn_clicked)
 
         for each in self.IMAGE_BUTTONS:
             self.media_box_layout.addWidget(each)
-        # self.media_box_layout.addWidget(self.demo_video_btn)
+
+        # ----------------------------------------------------------
+        #  ASSEMBLE LEFT + RIGHT COLUMNS
+        # ----------------------------------------------------------
 
         self.main_left_box.addWidget(self.information_box)
         self.main_left_box.addWidget(self.filetype_box)
@@ -383,11 +419,13 @@ class NodeVault_GUI(QWidget):
         self.main_left_box.addWidget(self.sub_category_box)
         self.main_left_box.addLayout(self.render_nuke_layout)
 
-# ++++
         self.main_right_box.addWidget(self.docs_box)
         self.main_right_box.addWidget(self.external_box)
         self.main_right_box.addWidget(self.media_box)
 
+        # ----------------------------------------------------------
+        #  SUBMIT BUTTON
+        # ----------------------------------------------------------
         
         self.btn_submit = QPushButton("SUBMIT")
         self.btn_submit.setMinimumHeight(40) 
@@ -398,19 +436,22 @@ class NodeVault_GUI(QWidget):
         
         self.btn_submit.clicked.connect(self.on_submit_clicked)
 
-
-# ----
         self.columns_layout.addLayout(self.main_left_box)
         self.columns_layout.addLayout(self.main_right_box)
         
         self.submit_master_layout.addLayout(self.columns_layout)
-        
         self.submit_master_layout.addWidget(self.btn_submit, alignment = Qt.AlignCenter)
         self.submit_master_layout.addStretch()
-        
-    # ***************** FUNC *******************
+
+    # ============================================================
+    #  FILE DIALOG HELPERS
+    # ============================================================
 
     def on_img_btn_clicked(self, button):
+        """
+        Open an image file dialog, set the button icon to a thumbnail,
+        and append the path to attached_images.
+        """
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Preview Image", "",
             "Images (*.png *.jpg *.jpeg)"
@@ -422,17 +463,11 @@ class NodeVault_GUI(QWidget):
             button.setIconSize(QSize(100, 100))
             self.attached_images.append(path)
 
-    # def on_video_btn_clicked(self, button):
-    #     path, _ = QFileDialog.getOpenFileName(
-    #         self, "Select Demo Video", "",
-    #         "Video (*.mp4 *.mov *.avi)"
-    #     )
-    #     if path:
-    #         filename = os.path.basename(path)
-    #         button.setText(filename)
-    #         self.attached_video.append(path)
-
     def on_doc_btn_clicked(self, button):
+        """
+        Open a document file dialog, update the label text,
+        and append the path to extra_docs.
+        """
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Extra Document", "",
             "PDF (*.pdf);;Doc File (*.doc)"
@@ -441,10 +476,12 @@ class NodeVault_GUI(QWidget):
             filename = os.path.basename(path)
             button.setText(filename)
             self.extra_docs.append(path)
+
+    # ============================================================
+    #  PREVIEW IMAGE BUTTON SLOTS
+    # ============================================================
+    # Each slot delegates to on_img_btn_clicked with its own button.
             
-    # *********** UPDATE GUI > LABEL / STATUS  ******************
-    
-    # ------- Label Update : IMAGE & VIDEO BOX -----------
     @Slot()
     def on_preview_btn_1_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_1)
@@ -464,14 +501,17 @@ class NodeVault_GUI(QWidget):
     @Slot()
     def on_preview_btn_5_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_5)
-        
-    # @Slot()
-    # def on_demo_video_btn_clicked(self):
-    #     self.on_video_btn_clicked(self.demo_video_btn)
 
-    # ------- Label Update : Main File -----------
+    # ============================================================
+    #  MAIN FILE + EXTRA DOCS SLOTS
+    # ============================================================
+
     @Slot()
     def on_file_browse_clicked(self):
+        """
+        Open a .gizmo file dialog and update the file label
+        with the selected filename.
+        """
         file_path, _ = QFileDialog.getOpenFileName(
             self, 
             "Select Main File", 
@@ -482,8 +522,6 @@ class NodeVault_GUI(QWidget):
             self.main_file = file_path
             self.file_label.setText(os.path.basename(file_path))      
             
-    # ------- Label Update : Extra Docs  -----------
-    
     @Slot()
     def on_extra1_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra1_lbl)
@@ -491,11 +529,22 @@ class NodeVault_GUI(QWidget):
     @Slot()
     def on_extra2_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra2_lbl)
+
+    # ============================================================
+    #  SAVE / SUBMIT
+    # ============================================================
         
     @Slot() 
     def save_json(self):
+        """
+        Validate all required fields, build the metadata dict, create
+        the submission folder, write the JSON, and copy all attached files.
+        Clears the form on success.
+        """
         
-        # -------- ERROR LIST + VALIDATE INPUTS ------------
+        # ----------------------------------------------------------
+        #  VALIDATE INPUTS  –  collect errors before writing anything
+        # ----------------------------------------------------------
         errors = []
         
         if not self.main_file:
@@ -527,12 +576,14 @@ class NodeVault_GUI(QWidget):
         filetype = self.filetype_bg.checkedButton().text()
 
         submitted_time = datetime.datetime.now().isoformat(timespec='seconds')
-        # submitted_time = datetime.datetime.now().date()
 
         filename = self.filename_le.text().strip()
         author = self.author_le.text()
         version = 0 
 
+        # ----------------------------------------------------------
+        #  VERSION FIELD  –  must be a positive integer
+        # ----------------------------------------------------------
         try:
             version_text = self.version_le.text().strip()
             if not version_text:
@@ -546,12 +597,17 @@ class NodeVault_GUI(QWidget):
         except Exception as e:
             errors.append(f"Version error: {e}")
 
-        # - -- ERROR MSG ----
+        # ----------------------------------------------------------
+        #  SHOW ERRORS  –  abort if any validation failed
+        # ----------------------------------------------------------
         if len(errors) != 0:
             error_string = "\n".join(f"- {each}" for each in errors)
             QMessageBox.critical(self, "Validation Errors", f"Please fix the following:\n{error_string}")
             return
         
+        # ----------------------------------------------------------
+        #  BUILD METADATA DICT
+        # ----------------------------------------------------------
         sub_category = self.subcategory_bg.checkedButton().text()
         render_type = self.render_bg.checkedButton().text()
         nuke_version = self.nuke_bg.checkedButton().text()
@@ -580,11 +636,12 @@ class NodeVault_GUI(QWidget):
             "issues_link": issues_link,
             "website": website_link,
             "extra_link": extra_link,
-            "attached_images": self.attached_images,
-            "attached_video": self.attached_video
+            "attached_images": self.attached_images
         }
-        
-        # Make Folder for Json File & Write JSON in it
+
+        # ----------------------------------------------------------
+        #  CREATE SUBMISSION FOLDER
+        # ----------------------------------------------------------
         folder_map = {
             "Gizmo" : GIZMO_FOLDER,
         }
@@ -595,7 +652,9 @@ class NodeVault_GUI(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Errors", f"Error > {e}")
 
-            
+        # ----------------------------------------------------------
+        #  WRITE JSON + COPY FILES
+        # ----------------------------------------------------------
         json_filename = os.path.join(save_dir, f"{self.submission_id}.json")
         
         try:
@@ -617,22 +676,19 @@ class NodeVault_GUI(QWidget):
                 os.makedirs(image_folder, exist_ok=True)
                 shutil.copy(src=image_file, dst=image_folder)
                 
-            for video_file in data["attached_video"]:
-                video_folder = os.path.join(save_dir, "Videos")
-                os.makedirs(video_folder, exist_ok=True)
-                shutil.copy(src=video_file, dst=video_folder)
-                
             save_msg = "The file has been submitted successfully."
             print(save_msg)
             QMessageBox.information(self, "Info", save_msg)
             
-            # ----------- CLEARING AFTER SUBMITTING THE DATA ----------
+            # ----------------------------------------------------------
+            #  CLEAR FORM AFTER SUCCESSFUL SUBMISSION
+            # ----------------------------------------------------------
+
             TEXT_FIELDS = [self.filename_le, self.version_le, self.tagline_le, self.repo_link, self.issues_link, self.website_link, self.extra_link , self.desc_edit]
             for each in TEXT_FIELDS:
                 each.clear()
                 
             LABEL_FIELDS = [self.file_label,self.extra1_lbl, self.extra2_lbl]
-
             for each in LABEL_FIELDS:
                 label = each.text()
                 each.setText("No file selected")
@@ -646,23 +702,26 @@ class NodeVault_GUI(QWidget):
             
             self.main_file = []  
             self.attached_images = []
-            self.attached_video = []
             self.extra_docs = []
             
             for each in self.IMAGE_BUTTONS:
                 each.setIcon(self.image_icon)
                 each.setIconSize(QSize(50, 50))
-                
-            # self.demo_video_btn.setText("")
-            # self.demo_video_btn.setIcon(self.video_icon)
-            # self.demo_video_btn.setIconSize(QSize(50, 50))
             
         except Exception as e:
             QMessageBox.critical(self, "Errors", f"Error > {e}")
 
-    
+    # ============================================================
+    #  LIBRARY – CATEGORY PANEL CLICK
+    # ============================================================
+
     @Slot() 
     def on_category_panel_clicked(self, index):
+        """
+        Filter the gizmo grid to show only items whose filetype or
+        sub_category matches the clicked tree node label.
+        """
+        # Always switch back to the Library tab when browsing categories.
         current = self.tabs.currentIndex()
         if current != 0:
             self.tabs.setCurrentIndex(0)
@@ -677,10 +736,16 @@ class NodeVault_GUI(QWidget):
         
         square_size = 85
         
+        # ----------------------------------------------------------
+        #  CLEAR EXISTING GRID WIDGETS
+        # ----------------------------------------------------------
         while self.files_grid_layout.count():
             item = self.files_grid_layout.takeAt(0)
             item.widget().deleteLater()
         
+        # ----------------------------------------------------------
+        #  POPULATE GRID  –  one button per matching submission
+        # ----------------------------------------------------------
         for each in folder_name:
             json_filename = f"{each}.json"
             each_folder_path = os.path.join(GIZMO_FOLDER, each)
@@ -710,11 +775,17 @@ class NodeVault_GUI(QWidget):
         if counter > 0:
             self.files_grid_layout.setColumnStretch(MAX_COLS, 1)
             self.files_grid_layout.setRowStretch(row + 1, 1)
-            
 
-            
+    # ============================================================
+    #  LIBRARY – GIZMO DETAIL TAB
+    # ============================================================
+    
+    @Slot()
     def on_gizmo_button_clicked(self):
-        
+        """
+        Read the submission JSON and open a new detail tab showing
+        description, metadata, links, preview images, and docs.
+        """
         button = self.sender()
         submission_id = button.property("submission_id")
         filetype_folder = os.path.join(GIZMO_FOLDER, submission_id)
@@ -723,7 +794,9 @@ class NodeVault_GUI(QWidget):
         with open(json_path, "r") as file:
             data = json.load(file)
             
-        # -----------------------------------------------
+        # ----------------------------------------------------------
+        #  BUILD DETAIL TAB LAYOUT
+        # ----------------------------------------------------------
         self.detailed_tab = QWidget()        
         self.detailed_tab_layout = QHBoxLayout(self.detailed_tab)
         
@@ -767,6 +840,7 @@ class NodeVault_GUI(QWidget):
         right_layout.addLayout(info_form)
 
         # -------- Right : Resources --------
+        # Show a button for each non-empty link; hide section if none exist.
         res_label = QLabel("Resources")
         res_font = res_label.font()
         res_font.setBold(True)
@@ -803,6 +877,7 @@ class NodeVault_GUI(QWidget):
         right_layout.addStretch()
         
         # --------- Preview Images ---------
+        # Scan the Images sub-folder and render thumbnail buttons.
         images_label = QLabel("Preview Images")
         right_layout.addWidget(images_label)
 
@@ -831,6 +906,7 @@ class NodeVault_GUI(QWidget):
             right_layout.addWidget(QLabel("None"))
 
         # --------- Extra Docs ---------
+        # Scan the Docs sub-folder and render a button per document.
         docs_label = QLabel("Extra Docs")
         right_layout.addWidget(docs_label)
 
@@ -858,9 +934,17 @@ class NodeVault_GUI(QWidget):
 
         index = self.tabs.addTab(self.detailed_tab, data["filename"])
         self.tabs.setCurrentIndex(index)
-        
-        
+
+    # ============================================================
+    #  SUBSCRIBE / COPY TO USER FOLDER
+    # ============================================================
+    
+    @Slot()   
     def copy_object_file(self):
+        """
+        Copy the .gizmo file from the studio folder into the user's
+        NodeVault_User folder under its human-readable filename.
+        """
         subscribe_btn = self.sender()
         object_id = subscribe_btn.property("object_id")
         filetype_folder = os.path.join(GIZMO_FOLDER, object_id)
@@ -881,19 +965,33 @@ class NodeVault_GUI(QWidget):
             os.makedirs(NODEVAULT_USER_FOLDER, exist_ok=True)
             dst_named_path = os.path.join(NODEVAULT_USER_FOLDER, f"{object_filename}.gizmo")
 
-            shutil.copy(src=object_file, dst=dst_named_path)            # it can rename the files
+            shutil.copy(src=object_file, dst=dst_named_path) 
             
             QMessageBox.information(self, "Info", f"Subscribed to {object_filename}")
         except Exception as e:
             print(f"{e}")
-                    
+
+    # ============================================================
+    #  TAB / LINK / FILE OPENERS
+    # ============================================================
+    
+    @Slot()
     def close_tabs(self, index):
+        """
+        Prevent closing the root Library tab (index 0);
+        remove any other tab normally.
+        """
         if index == 0:
             QMessageBox.critical(self, "Error", "You cant close ALL Tab")
         else:
             self.tabs.removeTab(index)
             
+    @Slot()
     def open_link(self):
+        """
+        Read the link value from the submission JSON and open it
+        in the system's default browser via QDesktopServices.
+        """
         btn = self.sender()
         object_id = btn.property("object_id")
         link_key = btn.property("link_key")
@@ -908,20 +1006,37 @@ class NodeVault_GUI(QWidget):
         else:
             print(f"No link available for {link_key}")
             
+    @Slot()
     def open_doc(self):
+        """
+        Open the stored doc path with the OS default application.
+        """
         btn = self.sender()
         doc_path = btn.property("doc_path")
         if doc_path and os.path.exists(doc_path):
             QDesktopServices.openUrl(QUrl.fromLocalFile(doc_path))
             
+    @Slot()
     def open_image(self):
+        """
+        Open the stored image path with the OS default application.
+        """
         btn = self.sender()
         img_path = btn.property("img_path")
         if img_path and os.path.exists(img_path):
             QDesktopServices.openUrl(QUrl.fromLocalFile(img_path))
+
+    # ============================================================
+    #  SUBMIT BUTTON SLOT
+    # ============================================================
             
     def on_submit_clicked(self):
+        """Delegate to save_json which handles validation and file I/O."""
         self.save_json()
+
+# ============================================================
+#  ENTRY POINTS
+# ============================================================
 
 window =  None
 
