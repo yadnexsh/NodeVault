@@ -54,10 +54,10 @@ variables are confusing in between
 
 
 -- IMP
-demo video + with talk
-main branch
-clear all the code not refactor
-remove all hardcoded paths  
+demo video + with talk - WIP
+main branch - Done
+clear all the code not refactor - Done
+remove all hardcoded paths  - Done
 - create samplee linkedin post - and msg to me, OK, POST...
 
 -- Connect

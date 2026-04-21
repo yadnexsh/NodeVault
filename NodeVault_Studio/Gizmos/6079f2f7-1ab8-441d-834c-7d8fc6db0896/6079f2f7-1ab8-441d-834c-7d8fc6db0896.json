@@ -1,0 +1,24 @@
+{
+    "uuid": "6079f2f7-1ab8-441d-834c-7d8fc6db0896",
+    "submitted": "2026-04-21T00:06:10",
+    "filetype": "Gizmo",
+    "filename": "IBK_Color",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "Enhances or supports IBK workflows by refining color extraction for better background subtraction.",
+    "tagline": "Stronger IBK, better keys",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/demo/demo.doc"
+    ],
+    "repo_link": "",
+    "issues_link": "",
+    "website": "www.bing.com",
+    "extra_link": "",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/demo/demo.png"
+    ],
+    "attached_video": []
+}

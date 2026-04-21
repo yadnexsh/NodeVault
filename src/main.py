@@ -20,8 +20,9 @@ from PySide2.QtWidgets import (
     QMessageBox,
     QFrame
 )
-from PySide2.QtGui import QPixmap, QStandardItemModel, QStandardItem, QIcon
-from PySide2.QtCore import Qt, Slot, QSize
+from PySide2.QtGui import QPixmap, QStandardItemModel, QStandardItem, QIcon, QDesktopServices
+from PySide2.QtCore import Qt, Slot, QSize, QUrl
+
 import sys
 import os
 import json
@@ -32,21 +33,28 @@ import shutil
 CURRENT_FILEDIR = os.path.dirname(__file__)
 ROOT_FOLDER = os.path.dirname(CURRENT_FILEDIR)
 
+NUKE_FOLDER = os.path.join((os.path.expanduser("~")), ".nuke")
+NODEVAULT_USER_FOLDER = os.path.join(NUKE_FOLDER, "NodeVault_User")
+
 MEDIA_FOLDER = os.path.join(CURRENT_FILEDIR, "media")
 ICON_FOLDER = os.path.join(MEDIA_FOLDER, "icons")
 
-NUKE_FOLDER = os.path.join((os.path.expanduser("~")), ".nuke")
-OUTPUT_FOLDER =  os.path.join(NUKE_FOLDER, "NodeVault_output")
-GIZMO_FOLDER = os.path.join(OUTPUT_FOLDER,"Gizmos")
+NODEVAULT_STUDIO_FOLDER =  os.path.join(ROOT_FOLDER, "NodeVault_Studio")
+GIZMO_FOLDER = os.path.join(NODEVAULT_STUDIO_FOLDER,"Gizmos")
+
+
 
 USERNAME = os.getlogin()
 
 ICON_IMAGE_PATH = os.path.join(ICON_FOLDER, "ICON_image.png")
+
+
 ICON_VIDEO_PATH = os.path.join(ICON_FOLDER, "ICON_video.png")
 
 FIXED_POLICY = QSizePolicy.Policy.Fixed
 FILETYPE_FOLDERS = ["Gizmos"]
 
+print("--" * 40)
 
 class NodeVault_GUI(QWidget):
     
@@ -56,15 +64,15 @@ class NodeVault_GUI(QWidget):
         self.resize(1300, 600)
         
         try:
-            if os.path.exists(OUTPUT_FOLDER):
-                print("Output folder exists")
+            if os.path.exists(NODEVAULT_STUDIO_FOLDER):
+                print("NODEVAULT_STUDIO_FOLDER folder exists")
             else:
-                os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-                print(f"Created Output folder.")
+                os.makedirs(NODEVAULT_STUDIO_FOLDER, exist_ok=True)
+                print(f"Created NODEVAULT_STUDIO_FOLDER folder.")
                 
             for each in FILETYPE_FOLDERS:
-                if not each in os.listdir(OUTPUT_FOLDER):
-                    each_folder = os.path.join(OUTPUT_FOLDER,f"{each}")
+                if not each in os.listdir(NODEVAULT_STUDIO_FOLDER):
+                    each_folder = os.path.join(NODEVAULT_STUDIO_FOLDER,f"{each}")
                     os.makedirs(each_folder)
                     print(f"Created {each} folder.")
                 else:
@@ -129,7 +137,7 @@ class NodeVault_GUI(QWidget):
 
         self.category_panel.setModel(model)
         self.category_panel.expandAll()
-        
+
         self.category_panel.clicked.connect(self.on_category_panel_clicked)
         
         # -------------- ACTIVE FILTER BAR --------------
@@ -153,6 +161,9 @@ class NodeVault_GUI(QWidget):
         # -------------- ASSEMBLE LIBRARY TAB --------------
         self.library_master_layout.addWidget(self.category_panel)
         self.library_master_layout.addLayout(self.right_panel_layout)
+        default_index = self.gizmos_item.index()
+        self.category_panel.setCurrentIndex(default_index)
+        self.on_category_panel_clicked(default_index)
         
         
     def init_submit_ui(self):
@@ -323,21 +334,21 @@ class NodeVault_GUI(QWidget):
         self.media_box = QGroupBox("Preview Images & Demo Video")
         self.media_box_layout = QHBoxLayout(self.media_box)
         self.image_icon = QIcon(ICON_IMAGE_PATH)
-        self.video_icon = QIcon(ICON_VIDEO_PATH)
+        # self.video_icon = QIcon(ICON_VIDEO_PATH)
 
         self.preview_btn_1 = QPushButton()
         self.preview_btn_2 = QPushButton()
         self.preview_btn_3 = QPushButton()
         self.preview_btn_4 = QPushButton()
         self.preview_btn_5 = QPushButton()
-        self.demo_video_btn = QPushButton()
+        # self.demo_video_btn = QPushButton()
         self.IMAGE_BUTTONS = [self.preview_btn_1,self.preview_btn_2,self.preview_btn_3,self.preview_btn_4,self.preview_btn_5]
         for each_image_btn in self.IMAGE_BUTTONS:
             each_image_btn.setIcon(self.image_icon)
             each_image_btn.setIconSize(QSize(50, 50))
             
-        self.demo_video_btn.setIcon(self.video_icon)
-        self.demo_video_btn.setIconSize(QSize(50, 50))
+        # self.demo_video_btn.setIcon(self.video_icon)
+        # self.demo_video_btn.setIconSize(QSize(50, 50))
         
         square_size = 100
         
@@ -346,7 +357,7 @@ class NodeVault_GUI(QWidget):
         self.preview_btn_3.setFixedSize(square_size, square_size)
         self.preview_btn_4.setFixedSize(square_size, square_size)
         self.preview_btn_5.setFixedSize(square_size, square_size)
-        self.demo_video_btn.setFixedSize(square_size, square_size)
+        # self.demo_video_btn.setFixedSize(square_size, square_size)
         
         # ---------------------------
 
@@ -355,11 +366,11 @@ class NodeVault_GUI(QWidget):
         self.preview_btn_3.clicked.connect(self.on_preview_btn_3_clicked)
         self.preview_btn_4.clicked.connect(self.on_preview_btn_4_clicked)
         self.preview_btn_5.clicked.connect(self.on_preview_btn_5_clicked)
-        self.demo_video_btn.clicked.connect(self.on_demo_video_btn_clicked)
+        # self.demo_video_btn.clicked.connect(self.on_demo_video_btn_clicked)
 
         for each in self.IMAGE_BUTTONS:
             self.media_box_layout.addWidget(each)
-        self.media_box_layout.addWidget(self.demo_video_btn)
+        # self.media_box_layout.addWidget(self.demo_video_btn)
 
         self.main_left_box.addWidget(self.information_box)
         self.main_left_box.addWidget(self.filetype_box)
@@ -406,21 +417,20 @@ class NodeVault_GUI(QWidget):
         )
         if path:
             filename = os.path.basename(path)
-            print(path)
             thumbnail = QIcon(path)
             button.setIcon(thumbnail)
             button.setIconSize(QSize(100, 100))
             self.attached_images.append(path)
 
-    def on_video_btn_clicked(self, button):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Select Demo Video", "",
-            "Video (*.mp4 *.mov *.avi)"
-        )
-        if path:
-            filename = os.path.basename(path)
-            button.setText(filename)
-            self.attached_video.append(path)
+    # def on_video_btn_clicked(self, button):
+    #     path, _ = QFileDialog.getOpenFileName(
+    #         self, "Select Demo Video", "",
+    #         "Video (*.mp4 *.mov *.avi)"
+    #     )
+    #     if path:
+    #         filename = os.path.basename(path)
+    #         button.setText(filename)
+    #         self.attached_video.append(path)
 
     def on_doc_btn_clicked(self, button):
         path, _ = QFileDialog.getOpenFileName(
@@ -455,9 +465,9 @@ class NodeVault_GUI(QWidget):
     def on_preview_btn_5_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_5)
         
-    @Slot()
-    def on_demo_video_btn_clicked(self):
-        self.on_video_btn_clicked(self.demo_video_btn)
+    # @Slot()
+    # def on_demo_video_btn_clicked(self):
+    #     self.on_video_btn_clicked(self.demo_video_btn)
 
     # ------- Label Update : Main File -----------
     @Slot()
@@ -466,7 +476,7 @@ class NodeVault_GUI(QWidget):
             self, 
             "Select Main File", 
             "", 
-            "Python Files (*.py);;Nuke Files (*.nk);;gizmo Files (*.gizmo)"
+            "gizmo Files (*.gizmo)"
         )
         if file_path:
             self.main_file = file_path
@@ -517,6 +527,7 @@ class NodeVault_GUI(QWidget):
         filetype = self.filetype_bg.checkedButton().text()
 
         submitted_time = datetime.datetime.now().isoformat(timespec='seconds')
+        # submitted_time = datetime.datetime.now().date()
 
         filename = self.filename_le.text().strip()
         author = self.author_le.text()
@@ -611,7 +622,9 @@ class NodeVault_GUI(QWidget):
                 os.makedirs(video_folder, exist_ok=True)
                 shutil.copy(src=video_file, dst=video_folder)
                 
-            QMessageBox.information(self, "Info", "The file has been submitted successfully.")
+            save_msg = "The file has been submitted successfully."
+            print(save_msg)
+            QMessageBox.information(self, "Info", save_msg)
             
             # ----------- CLEARING AFTER SUBMITTING THE DATA ----------
             TEXT_FIELDS = [self.filename_le, self.version_le, self.tagline_le, self.repo_link, self.issues_link, self.website_link, self.extra_link , self.desc_edit]
@@ -640,9 +653,9 @@ class NodeVault_GUI(QWidget):
                 each.setIcon(self.image_icon)
                 each.setIconSize(QSize(50, 50))
                 
-            self.demo_video_btn.setText("")
-            self.demo_video_btn.setIcon(self.video_icon)
-            self.demo_video_btn.setIconSize(QSize(50, 50))
+            # self.demo_video_btn.setText("")
+            # self.demo_video_btn.setIcon(self.video_icon)
+            # self.demo_video_btn.setIconSize(QSize(50, 50))
             
         except Exception as e:
             QMessageBox.critical(self, "Errors", f"Error > {e}")
@@ -650,14 +663,17 @@ class NodeVault_GUI(QWidget):
     
     @Slot() 
     def on_category_panel_clicked(self, index):
-        
+        current = self.tabs.currentIndex()
+        if current != 0:
+            self.tabs.setCurrentIndex(0)
+    
         folder_name = os.listdir(GIZMO_FOLDER)
         
         MAX_COLS = 10
         counter = 0
         
-        clicked_text = index.data()
-        print(clicked_text)
+        clicked_row = index.data()
+        print("clicked_row", clicked_row)
         
         square_size = 85
         
@@ -669,7 +685,10 @@ class NodeVault_GUI(QWidget):
             json_filename = f"{each}.json"
             each_folder_path = os.path.join(GIZMO_FOLDER, each)
             each_json = os.path.join(each_folder_path, json_filename)
-            
+            if not os.path.isdir(each_folder_path): 
+                continue
+            if not os.path.exists(each_json):  
+                continue   
             with open(each_json, "r") as file:
                 data = json.load(file)
                 submission_id = data["uuid"]
@@ -677,7 +696,7 @@ class NodeVault_GUI(QWidget):
                 filetype = data["filetype"]
                 sub_category = data["sub_category"]
             
-            if clicked_text == filetype or clicked_text == sub_category:
+            if clicked_row == filetype or clicked_row == sub_category:
                 col = counter % MAX_COLS
                 row = counter // MAX_COLS
                 each = QPushButton(filename)
@@ -691,6 +710,8 @@ class NodeVault_GUI(QWidget):
         if counter > 0:
             self.files_grid_layout.setColumnStretch(MAX_COLS, 1)
             self.files_grid_layout.setRowStretch(row + 1, 1)
+            
+
             
     def on_gizmo_button_clicked(self):
         
@@ -707,87 +728,198 @@ class NodeVault_GUI(QWidget):
         self.detailed_tab_layout = QHBoxLayout(self.detailed_tab)
         
         left_layout = QVBoxLayout()
-        
+        right_layout = QVBoxLayout()
+
+        # -------- Left : Header --------
         header_row = QHBoxLayout()
         
-        self.det_filename = QLabel()
+        self.det_filename = QLabel(data["filename"])
         filename_font = self.det_filename.font()
         filename_font.setBold(True)
         filename_font.setPointSize(24)
         self.det_filename.setFont(filename_font)
         
-        self.det_author = QLabel()
-        
+        self.det_author = QLabel(f"by {data['author']}")
         header_row.addWidget(self.det_filename)
         header_row.addWidget(self.det_author)
         header_row.addStretch()
         
-        self.det_tagline = QLabel()
-        desc_label = QLabel()
+        self.det_tagline = QLabel(data['tagline'])
         self.det_desc = QTextEdit()
+        self.det_desc.setPlainText(data["description"])
         self.det_desc.setReadOnly(True)
 
         left_layout.addLayout(header_row)
         left_layout.addWidget(self.det_tagline)
-        left_layout.addWidget(desc_label)
         left_layout.addWidget(self.det_desc)
 
-        right_layout = QVBoxLayout()
-
-        # -------- Node Info Group -------------
+        # -------- Right : Node Info --------
         info_label = QLabel("Node Info")
+        info_font = info_label.font()
+        info_font.setBold(True)
+        info_label.setFont(info_font)
+        
         info_form = QFormLayout()
-        info_form.addRow("Version", QLabel("v2.02.03"))
-        info_form.addRow("Submitted", QLabel("16 Feb 2026"))
-        info_form.addRow("Size", QLabel("23kb"))
+        info_form.addRow("Version:", QLabel(str(data["version"])))
+        info_form.addRow("Submitted:", QLabel(str(data["submitted"])))
 
-        # --------- Resources Group -------
-        res_label = QLabel("Resources")
-        self.res_repo = QPushButton("Repo")
-        self.res_issue = QPushButton("Issue")
-        self.res_docs = QPushButton("Docs")
-        self.subscribe = QPushButton("subscribe")
         right_layout.addWidget(info_label)
         right_layout.addLayout(info_form)
+
+        # -------- Right : Resources --------
+        res_label = QLabel("Resources")
+        res_font = res_label.font()
+        res_font.setBold(True)
+        res_label.setFont(res_font)
         right_layout.addWidget(res_label)
-        right_layout.addWidget(self.res_repo)
-        right_layout.addWidget(self.res_issue)
-        right_layout.addWidget(self.res_docs)
-        right_layout.addWidget(self.subscribe)
-        right_layout.addStretch() 
-        self.detailed_tab_layout.addLayout(left_layout, 7)  
-        self.detailed_tab_layout.addLayout(right_layout, 3)
+
+        has_any_link = False
+        for key, label in [
+            ("repo_link",   "Repo"),
+            ("issues_link", "Issue"),
+            ("website",     "Website"),
+            ("extra_link",  "Extra"),
+        ]:
+            link_val = data.get(key, "").strip()
+            if link_val:
+                has_any_link = True
+                btn = QPushButton(label)
+                btn.setProperty("object_id", submission_id)
+                btn.setProperty("link_key", key)
+                btn.clicked.connect(self.open_link)
+                right_layout.addWidget(btn)
+
+        if not has_any_link:
+            none_lbl = QLabel("No links available")
+            none_lbl.setStyleSheet("color: gray;")
+            right_layout.addWidget(none_lbl)
+
+        # -------- Right : Subscribe --------
+        self.subscribe = QPushButton("Subscribe")
         self.subscribe.setProperty("object_id", submission_id)
         self.subscribe.clicked.connect(self.copy_object_file)
+        right_layout.addWidget(self.subscribe)
         
+        right_layout.addStretch()
         
-        self.det_filename.setText(data["filename"])
-        self.det_author.setText(f"by {data['author']}")
-        self.det_tagline.setText(data['tagline']) 
-        self.det_desc.setPlainText(data["description"])
-        index = self.tabs.indexOf(self.detailed_tab)
+        # --------- Preview Images ---------
+        images_label = QLabel("Preview Images")
+        right_layout.addWidget(images_label)
+
+        image_folder = os.path.join(filetype_folder, "Images")
+        if os.path.isdir(image_folder):
+            images = []
+            for f in os.listdir(image_folder):
+                if f.endswith((".png", ".jpg", ".jpeg")):
+                    images.append(f)
+            if images:
+                images_grid = QHBoxLayout()
+                for img_file in images:
+                    img_path = os.path.join(image_folder, img_file)
+                    btn = QPushButton()
+                    pixmap = QPixmap(img_path).scaled(80, 80, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                    btn.setIcon(QIcon(pixmap))
+                    btn.setIconSize(QSize(80, 80))
+                    btn.setFixedSize(85, 85)
+                    btn.setProperty("img_path", img_path)
+                    btn.clicked.connect(self.open_image)
+                    images_grid.addWidget(btn)
+                right_layout.addLayout(images_grid)
+            else:
+                right_layout.addWidget(QLabel("None"))
+        else:
+            right_layout.addWidget(QLabel("None"))
+
+        # --------- Extra Docs ---------
+        docs_label = QLabel("Extra Docs")
+        right_layout.addWidget(docs_label)
+
+        docs_folder = os.path.join(filetype_folder, "Docs")
+        if os.path.isdir(docs_folder):
+            docs = []
+            for f in os.listdir(docs_folder):
+                if f.endswith(".pdf") or f.endswith(".doc"):
+                    docs.append(f)
+            if docs:
+                for doc_file in docs:
+                    doc_path = os.path.join(docs_folder, doc_file)
+                    btn = QPushButton(doc_file)
+                    btn.setProperty("doc_path", doc_path)
+                    btn.clicked.connect(self.open_doc)
+                    right_layout.addWidget(btn)
+            else:
+                right_layout.addWidget(QLabel("None"))
+        else:
+            right_layout.addWidget(QLabel("None"))
+
+        # -------- Assemble --------
+        self.detailed_tab_layout.addLayout(left_layout, 7)  
+        self.detailed_tab_layout.addLayout(right_layout, 3)
+
         index = self.tabs.addTab(self.detailed_tab, data["filename"])
         self.tabs.setCurrentIndex(index)
-
+        
+        
     def copy_object_file(self):
         subscribe_btn = self.sender()
         object_id = subscribe_btn.property("object_id")
         filetype_folder = os.path.join(GIZMO_FOLDER, object_id)
-        print(filetype_folder)
+        print("filetype_folder", filetype_folder)
         for each in os.listdir(filetype_folder):
             if each.endswith(".gizmo"):
-                file = os.path.join(filetype_folder, each)
-
-
+                object_file = os.path.join(filetype_folder, each)
+                
+        object_folder = os.path.join(GIZMO_FOLDER , object_id)
+        object_json = os.path.join(object_folder, f"{object_id}.json")
         
-        shutil.copy(src=file, dst=nodevault_folder)
-        
+        with open(object_json, "r") as file:
+            data = json.load(file)
+            
+        object_filename = data["filename"]
+            
+        try:
+            os.makedirs(NODEVAULT_USER_FOLDER, exist_ok=True)
+            dst_named_path = os.path.join(NODEVAULT_USER_FOLDER, f"{object_filename}.gizmo")
+
+            shutil.copy(src=object_file, dst=dst_named_path)            # it can rename the files
+            
+            QMessageBox.information(self, "Info", f"Subscribed to {object_filename}")
+        except Exception as e:
+            print(f"{e}")
+                    
     def close_tabs(self, index):
         if index == 0:
             QMessageBox.critical(self, "Error", "You cant close ALL Tab")
         else:
             self.tabs.removeTab(index)
-
+            
+    def open_link(self):
+        btn = self.sender()
+        object_id = btn.property("object_id")
+        link_key = btn.property("link_key")
+        
+        object_json = os.path.join(GIZMO_FOLDER, object_id, f"{object_id}.json")
+        with open(object_json, "r") as file:
+            data = json.load(file)
+        
+        link = data.get(link_key, "").strip()
+        if link:
+            QDesktopServices.openUrl(QUrl(link))
+        else:
+            print(f"No link available for {link_key}")
+            
+    def open_doc(self):
+        btn = self.sender()
+        doc_path = btn.property("doc_path")
+        if doc_path and os.path.exists(doc_path):
+            QDesktopServices.openUrl(QUrl.fromLocalFile(doc_path))
+            
+    def open_image(self):
+        btn = self.sender()
+        img_path = btn.property("img_path")
+        if img_path and os.path.exists(img_path):
+            QDesktopServices.openUrl(QUrl.fromLocalFile(img_path))
+            
     def on_submit_clicked(self):
         self.save_json()
 

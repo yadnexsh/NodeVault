@@ -1,0 +1,24 @@
+{
+    "uuid": "78902781-2b3e-43db-9ad4-3e1d224c631e",
+    "submitted": "2026-04-21T00:16:56",
+    "filetype": "Gizmo",
+    "filename": "PxF_AreaLight",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "Simulates an area light effect directly in comp, likely adding soft, spread-out lighting with falloff controls.",
+    "tagline": "Soft light, straight in comp",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/demo/demo.doc"
+    ],
+    "repo_link": "www.google.com",
+    "issues_link": "",
+    "website": "www.bing.com",
+    "extra_link": "",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/demo/demo.png"
+    ],
+    "attached_video": []
+}
