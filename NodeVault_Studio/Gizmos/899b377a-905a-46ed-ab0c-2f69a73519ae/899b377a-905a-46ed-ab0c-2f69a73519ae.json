@@ -1,0 +1,20 @@
+{
+    "uuid": "899b377a-905a-46ed-ab0c-2f69a73519ae",
+    "submitted": "2026-04-21T00:00:02",
+    "filetype": "Gizmo",
+    "filename": "C_Blur",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Channel",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "A custom blur tool that likely provides more control than standard blur nodes, possibly with edge-aware or directional features.",
+    "tagline": "Blur, but smarter",
+    "extra_docs": [],
+    "repo_link": "",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [],
+    "attached_video": []
+}

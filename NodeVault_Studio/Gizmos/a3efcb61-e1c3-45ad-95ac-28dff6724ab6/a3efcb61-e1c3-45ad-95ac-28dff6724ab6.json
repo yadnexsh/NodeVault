@@ -1,0 +1,24 @@
+{
+    "uuid": "a3efcb61-e1c3-45ad-95ac-28dff6724ab6",
+    "submitted": "2026-04-22T02:47:16",
+    "filetype": "Gizmo",
+    "filename": "PxF_BandPass",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Image",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "Extract detail from an image by subtracting the original image from a blur of itself. Useful to enhance an image for easier tracking.",
+    "tagline": "Extract the Details",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/demo/PxF_BandPass.doc"
+    ],
+    "repo_link": "www.google.com",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/demo/PxF_BandPass.jpg"
+    ],
+    "attached_video": []
+}

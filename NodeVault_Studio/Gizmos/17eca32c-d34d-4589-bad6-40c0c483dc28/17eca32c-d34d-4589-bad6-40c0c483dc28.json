@@ -1,0 +1,20 @@
+{
+    "uuid": "17eca32c-d34d-4589-bad6-40c0c483dc28",
+    "submitted": "2026-04-20T23:52:45",
+    "filetype": "Gizmo",
+    "filename": "BandPass",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Image",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "Isolates specific frequency ranges in the image to help with targeted detail control, cleanup, or enhancement work. Useful for separating noise from fine details.",
+    "tagline": "Precision control over image frequencies",
+    "extra_docs": [],
+    "repo_link": "",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [],
+    "attached_video": []
+}

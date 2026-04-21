@@ -1,0 +1,20 @@
+{
+    "uuid": "fa16fd1b-bf4b-4e52-8b7c-be5d417f1323",
+    "submitted": "2026-04-21T00:04:57",
+    "filetype": "Gizmo",
+    "filename": "frozen_glass",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Filter",
+    "render": "GPU",
+    "nuke_version": "Nuke13-",
+    "description": "Applies a frosted or distorted glass effect, adding diffusion and texture to the image.",
+    "tagline": "Freeze the view with style",
+    "extra_docs": [],
+    "repo_link": "www.goole.com",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [],
+    "attached_video": []
+}
