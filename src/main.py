@@ -482,23 +482,23 @@ class NodeVault_GUI(QWidget):
     # ============================================================
     # Each slot delegates to on_img_btn_clicked with its own button.
             
-    @Slot()
+    # @Slot()
     def on_preview_btn_1_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_1)
         
-    @Slot()
+    # @Slot()
     def on_preview_btn_2_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_2)
         
-    @Slot()
+    # @Slot()
     def on_preview_btn_3_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_3)
         
-    @Slot()
+    # @Slot()
     def on_preview_btn_4_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_4)
         
-    @Slot()
+    # @Slot()
     def on_preview_btn_5_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_5)
 
@@ -506,7 +506,7 @@ class NodeVault_GUI(QWidget):
     #  MAIN FILE + EXTRA DOCS SLOTS
     # ============================================================
 
-    @Slot()
+    # @Slot()
     def on_file_browse_clicked(self):
         """
         Open a .gizmo file dialog and update the file label
@@ -522,11 +522,11 @@ class NodeVault_GUI(QWidget):
             self.main_file = file_path
             self.file_label.setText(os.path.basename(file_path))      
             
-    @Slot()
+    # @Slot()
     def on_extra1_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra1_lbl)
         
-    @Slot()
+    # @Slot()
     def on_extra2_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra2_lbl)
 
@@ -534,7 +534,7 @@ class NodeVault_GUI(QWidget):
     #  SAVE / SUBMIT
     # ============================================================
         
-    @Slot() 
+    # @Slot() 
     def save_json(self):
         """
         Validate all required fields, build the metadata dict, create
@@ -715,7 +715,7 @@ class NodeVault_GUI(QWidget):
     #  LIBRARY – CATEGORY PANEL CLICK
     # ============================================================
 
-    @Slot() 
+    # @Slot() 
     def on_category_panel_clicked(self, index):
         """
         Filter the gizmo grid to show only items whose filetype or
@@ -780,7 +780,7 @@ class NodeVault_GUI(QWidget):
     #  LIBRARY – GIZMO DETAIL TAB
     # ============================================================
     
-    @Slot()
+    # # @Slot()
     def on_gizmo_button_clicked(self):
         """
         Read the submission JSON and open a new detail tab showing
@@ -939,7 +939,7 @@ class NodeVault_GUI(QWidget):
     #  SUBSCRIBE / COPY TO USER FOLDER
     # ============================================================
     
-    @Slot()   
+    # # @Slot()   
     def copy_object_file(self):
         """
         Copy the .gizmo file from the studio folder into the user's
@@ -975,7 +975,7 @@ class NodeVault_GUI(QWidget):
     #  TAB / LINK / FILE OPENERS
     # ============================================================
     
-    @Slot()
+    # @Slot()
     def close_tabs(self, index):
         """
         Prevent closing the root Library tab (index 0);
@@ -986,7 +986,7 @@ class NodeVault_GUI(QWidget):
         else:
             self.tabs.removeTab(index)
             
-    @Slot()
+    # @Slot()
     def open_link(self):
         """
         Read the link value from the submission JSON and open it
@@ -1006,7 +1006,7 @@ class NodeVault_GUI(QWidget):
         else:
             print(f"No link available for {link_key}")
             
-    @Slot()
+    # @Slot()
     def open_doc(self):
         """
         Open the stored doc path with the OS default application.
@@ -1016,7 +1016,7 @@ class NodeVault_GUI(QWidget):
         if doc_path and os.path.exists(doc_path):
             QDesktopServices.openUrl(QUrl.fromLocalFile(doc_path))
             
-    @Slot()
+    # @Slot()
     def open_image(self):
         """
         Open the stored image path with the OS default application.
