@@ -1,1 +1,0 @@
-Fake refraction using an 'edge-detected' deformation map. Useful to simulate glass-like relections/refractions. Can also be used to grow edges on tricky chroma keys by distorting the RGB channels using the Alpha as the deformation map.

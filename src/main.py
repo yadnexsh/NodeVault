@@ -28,9 +28,9 @@ import datetime
 import uuid
 import shutil
 
-# ============================================================
+
 #  PATH CONSTANTS
-# ============================================================
+# --------------------
 # All folder paths resolved once at import time.
 
 CURRENT_FILEDIR = os.path.dirname(__file__)
@@ -45,9 +45,9 @@ ICON_FOLDER = os.path.join(MEDIA_FOLDER, "icons")
 NODEVAULT_STUDIO_FOLDER =  os.path.join(ROOT_FOLDER, "NodeVault_Studio")
 GIZMO_FOLDER = os.path.join(NODEVAULT_STUDIO_FOLDER,"Gizmos")
 
-# ============================================================
+
 #  MISC CONSTANTS
-# ============================================================
+# --------------------
 
 USERNAME = os.getlogin()
 ICON_IMAGE_PATH = os.path.join(ICON_FOLDER, "ICON_image.png")
@@ -56,9 +56,9 @@ FILETYPE_FOLDERS = ["Gizmos"]
 
 print("--" * 40)
 
-# ============================================================
+
 #  MAIN WINDOW
-# ============================================================
+# --------------------
 
 class NodeVault_GUI(QWidget):
     
@@ -71,7 +71,7 @@ class NodeVault_GUI(QWidget):
         self.setWindowTitle("Node Vault")
         self.resize(1300, 600)
         
-        # ----------------------------------------------------------
+        
         #  FOLDER SETUP  –  create NodeVault_Studio + sub-folders
         # ----------------------------------------------------------
         try:
@@ -93,14 +93,11 @@ class NodeVault_GUI(QWidget):
             
         self.initUI()
 
-        # ----------------------------------------------------------
-        #  ATTACHMENT STATE  –  populated when the user browses files
-        # ----------------------------------------------------------
         self.main_file = []
         self.attached_images = []
         self.extra_docs = []
         
-    # ============================================================
+    # --------------------
 
     def initUI(self):
         """
@@ -126,7 +123,6 @@ class NodeVault_GUI(QWidget):
         # -------------- ASSEMBLE MAIN WINDOW --------------
         self.main_layout.addWidget(self.primary_tabs)
 
-    # ============================================================
 
     def init_library_ui(self):
         """
@@ -194,7 +190,7 @@ class NodeVault_GUI(QWidget):
         self.category_panel.setCurrentIndex(default_index)
         self.on_category_panel_clicked(default_index)
         
-    # ============================================================
+    # --------------------
 
     def init_submit_ui(self):
         """
@@ -404,7 +400,7 @@ class NodeVault_GUI(QWidget):
         for each in self.IMAGE_BUTTONS:
             self.media_box_layout.addWidget(each)
 
-        # ----------------------------------------------------------
+
         #  ASSEMBLE LEFT + RIGHT COLUMNS
         # ----------------------------------------------------------
 
@@ -423,7 +419,7 @@ class NodeVault_GUI(QWidget):
         self.main_right_box.addWidget(self.external_box)
         self.main_right_box.addWidget(self.media_box)
 
-        # ----------------------------------------------------------
+
         #  SUBMIT BUTTON
         # ----------------------------------------------------------
         
@@ -443,9 +439,9 @@ class NodeVault_GUI(QWidget):
         self.submit_master_layout.addWidget(self.btn_submit, alignment = Qt.AlignCenter)
         self.submit_master_layout.addStretch()
 
-    # ============================================================
+
     #  FILE DIALOG HELPERS
-    # ============================================================
+    # --------------------
 
     def on_img_btn_clicked(self, button):
         """
@@ -477,9 +473,9 @@ class NodeVault_GUI(QWidget):
             button.setText(filename)
             self.extra_docs.append(path)
 
-    # ============================================================
+
     #  PREVIEW IMAGE BUTTON SLOTS
-    # ============================================================
+    # --------------------
     # Each slot delegates to on_img_btn_clicked with its own button.
             
     # @Slot()
@@ -502,9 +498,9 @@ class NodeVault_GUI(QWidget):
     def on_preview_btn_5_clicked(self):
         self.on_img_btn_clicked(self.preview_btn_5)
 
-    # ============================================================
+
     #  MAIN FILE + EXTRA DOCS SLOTS
-    # ============================================================
+    # --------------------
 
     # @Slot()
     def on_file_browse_clicked(self):
@@ -530,9 +526,8 @@ class NodeVault_GUI(QWidget):
     def on_extra2_browse_clicked(self):
         self.on_doc_btn_clicked(self.extra2_lbl)
 
-    # ============================================================
     #  SAVE / SUBMIT
-    # ============================================================
+    # --------------------
         
     # @Slot() 
     def save_json(self):
@@ -542,7 +537,7 @@ class NodeVault_GUI(QWidget):
         Clears the form on success.
         """
         
-        # ----------------------------------------------------------
+
         #  VALIDATE INPUTS  –  collect errors before writing anything
         # ----------------------------------------------------------
         errors = []
@@ -581,7 +576,6 @@ class NodeVault_GUI(QWidget):
         author = self.author_le.text()
         version = 0 
 
-        # ----------------------------------------------------------
         #  VERSION FIELD  –  must be a positive integer
         # ----------------------------------------------------------
         try:
@@ -597,7 +591,7 @@ class NodeVault_GUI(QWidget):
         except Exception as e:
             errors.append(f"Version error: {e}")
 
-        # ----------------------------------------------------------
+
         #  SHOW ERRORS  –  abort if any validation failed
         # ----------------------------------------------------------
         if len(errors) != 0:
@@ -605,7 +599,7 @@ class NodeVault_GUI(QWidget):
             QMessageBox.critical(self, "Validation Errors", f"Please fix the following:\n{error_string}")
             return
         
-        # ----------------------------------------------------------
+
         #  BUILD METADATA DICT
         # ----------------------------------------------------------
         sub_category = self.subcategory_bg.checkedButton().text()
@@ -639,7 +633,7 @@ class NodeVault_GUI(QWidget):
             "attached_images": self.attached_images
         }
 
-        # ----------------------------------------------------------
+
         #  CREATE SUBMISSION FOLDER
         # ----------------------------------------------------------
         folder_map = {
@@ -652,7 +646,6 @@ class NodeVault_GUI(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Errors", f"Error > {e}")
 
-        # ----------------------------------------------------------
         #  WRITE JSON + COPY FILES
         # ----------------------------------------------------------
         json_filename = os.path.join(save_dir, f"{self.submission_id}.json")
@@ -680,7 +673,6 @@ class NodeVault_GUI(QWidget):
             print(save_msg)
             QMessageBox.information(self, "Info", save_msg)
             
-            # ----------------------------------------------------------
             #  CLEAR FORM AFTER SUCCESSFUL SUBMISSION
             # ----------------------------------------------------------
 
@@ -711,9 +703,8 @@ class NodeVault_GUI(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Errors", f"Error > {e}")
 
-    # ============================================================
     #  LIBRARY – CATEGORY PANEL CLICK
-    # ============================================================
+    # --------------------
 
     # @Slot() 
     def on_category_panel_clicked(self, index):
@@ -736,14 +727,14 @@ class NodeVault_GUI(QWidget):
         
         square_size = 85
         
-        # ----------------------------------------------------------
+
         #  CLEAR EXISTING GRID WIDGETS
         # ----------------------------------------------------------
         while self.files_grid_layout.count():
             item = self.files_grid_layout.takeAt(0)
             item.widget().deleteLater()
         
-        # ----------------------------------------------------------
+
         #  POPULATE GRID  –  one button per matching submission
         # ----------------------------------------------------------
         for each in folder_name:
@@ -776,9 +767,9 @@ class NodeVault_GUI(QWidget):
             self.files_grid_layout.setColumnStretch(MAX_COLS, 1)
             self.files_grid_layout.setRowStretch(row + 1, 1)
 
-    # ============================================================
+
     #  LIBRARY – GIZMO DETAIL TAB
-    # ============================================================
+    # --------------------
     
     # # @Slot()
     def on_gizmo_button_clicked(self):
@@ -793,8 +784,7 @@ class NodeVault_GUI(QWidget):
             
         with open(json_path, "r") as file:
             data = json.load(file)
-            
-        # ----------------------------------------------------------
+
         #  BUILD DETAIL TAB LAYOUT
         # ----------------------------------------------------------
         self.detailed_tab = QWidget()        
@@ -935,9 +925,9 @@ class NodeVault_GUI(QWidget):
         index = self.tabs.addTab(self.detailed_tab, data["filename"])
         self.tabs.setCurrentIndex(index)
 
-    # ============================================================
+
     #  SUBSCRIBE / COPY TO USER FOLDER
-    # ============================================================
+    # --------------------
     
     # # @Slot()   
     def copy_object_file(self):
@@ -971,9 +961,9 @@ class NodeVault_GUI(QWidget):
         except Exception as e:
             print(f"{e}")
 
-    # ============================================================
+
     #  TAB / LINK / FILE OPENERS
-    # ============================================================
+    # --------------------
     
     # @Slot()
     def close_tabs(self, index):
@@ -1026,17 +1016,13 @@ class NodeVault_GUI(QWidget):
         if img_path and os.path.exists(img_path):
             QDesktopServices.openUrl(QUrl.fromLocalFile(img_path))
 
-    # ============================================================
     #  SUBMIT BUTTON SLOT
-    # ============================================================
+    # --------------------
             
     def on_submit_clicked(self):
         """Delegate to save_json which handles validation and file I/O."""
         self.save_json()
 
-# ============================================================
-#  ENTRY POINTS
-# ============================================================
 
 window =  None
 
