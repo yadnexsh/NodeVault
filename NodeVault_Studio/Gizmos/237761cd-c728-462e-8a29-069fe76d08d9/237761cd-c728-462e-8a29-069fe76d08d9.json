@@ -1,0 +1,26 @@
+{
+    "uuid": "237761cd-c728-462e-8a29-069fe76d08d9",
+    "submitted": "2026-04-19T20:24:23",
+    "filetype": "Gizmo",
+    "filename": "ColorKey",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "This is a desc",
+    "tagline": "This is a tagline",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/demo/demo.doc"
+    ],
+    "repo_link": "www.google.com",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [
+        "C:/Users/Yadnyesh/Pictures/1.png"
+    ],
+    "attached_video": [
+        "H:/Gamut/Projects/node_vault/demo/demo.mp4"
+    ]
+}

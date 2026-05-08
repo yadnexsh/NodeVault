@@ -1,0 +1,27 @@
+{
+    "uuid": "c513114d-6f9d-408b-88bb-6ba7e248d7bc",
+    "submitted": "2026-04-19T20:22:18",
+    "filetype": "Gizmo",
+    "filename": "Relight",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "This is a desc",
+    "tagline": "This is a tagline",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/demo/demo.doc"
+    ],
+    "repo_link": "www.google.com",
+    "issues_link": "",
+    "website": "",
+    "extra_link": "",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/demo/demo.png",
+        "C:/Users/Yadnyesh/Pictures/1.png"
+    ],
+    "attached_video": [
+        "H:/Gamut/Projects/node_vault/demo/demo.mp4"
+    ]
+}

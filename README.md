@@ -71,10 +71,6 @@ project_root/
 
 ---
 
-## Installation
-
-WIP
-
 
 ---
 
@@ -133,7 +129,7 @@ Each submission produces a JSON metadata file:
 - The **Author** field is auto-populated from the OS login name and is read-only.
 - All submitted files are identified and stored by a UUID, preventing naming conflicts.
 - The library supports re-opening multiple gizmo detail tabs simultaneously - only the root *Library* tab cannot be closed.
-- `NodeVault_Studio` and its subdirectories are created automatically on first launch if they do not exist.
+- `NodeVault_Studio` acts as the shared, central repository (the "server-side" dataset) for your team/studio where all published gizmos, metadata, images, and documents are stored globally. It and its subdirectories are created automatically on first launch if they do not exist.
 - There will be more future updates to this codebase.
 ---
 

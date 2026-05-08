@@ -1,0 +1,26 @@
+{
+    "uuid": "3c97fbd9-11a6-4f2f-9383-711b86f1eb50",
+    "submitted": "2026-04-19T20:29:48",
+    "filetype": "Gizmo",
+    "filename": "Test Gizmo",
+    "author": "Yadnyesh",
+    "version": 1,
+    "sub_category": "Deep",
+    "render": "CPU",
+    "nuke_version": "Nuke13-",
+    "description": "This is desc",
+    "tagline": "This is tagline",
+    "extra_docs": [
+        "H:/Gamut/Projects/node_vault/demo/demo.doc"
+    ],
+    "repo_link": "www.bing.com",
+    "issues_link": "www.yahoo.com",
+    "website": "www.google.com",
+    "extra_link": "",
+    "attached_images": [
+        "H:/Gamut/Projects/node_vault/demo/demo.png"
+    ],
+    "attached_video": [
+        "H:/Gamut/Projects/node_vault/demo/demo.mp4"
+    ]
+}
