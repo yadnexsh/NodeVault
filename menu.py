@@ -1,7 +1,7 @@
 import os
 import nuke
 
-NODEVAULT_ICON = os.path.join(os.path.dirname(NV_Tool.__file__), "media", "icons", "ICON_NodeVault.png")
+NODEVAULT_ICON = os.path.join(os.path.dirname(__file__), "src", "media", "icons", "ICON_NodeVault.png")
 NODEVAULT_USER_FOLDER = os.path.expanduser("~/.nuke/NodeVault_User")
 toolbar = nuke.toolbar("Nodes").addMenu("Node Vault", icon = NODEVAULT_ICON)
 
