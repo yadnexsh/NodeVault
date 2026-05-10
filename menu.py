@@ -1,6 +1,6 @@
 import os
 import nuke
-import src.main
+import nodevault.main
 
 # src.main.__file__ correctly returns the path to your src/main.py file
 # os.path.dirname gets the 'src' folder. Then we just add media/icons/...
