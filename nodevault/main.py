@@ -29,7 +29,7 @@ import uuid
 import shutil
 
 
-from src.constants import (
+from nodevault.constants import (
     CURRENT_FILEDIR,
     ROOT_FOLDER,
     NUKE_FOLDER,
